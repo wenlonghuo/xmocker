@@ -1,11 +1,12 @@
 {
-  "name": "fe-mock-server",
+  "name": "dmock-middleware",
   "version": "1.0.0",
-  "description": "a server to provide api data for fe",
+  "description": "a middleware to start a dmock server quickly",
   "main": "index.js",
   "scripts": {
-    "start": "node ./app/app-base",
-    "dev": "nodemon ./app/app-base --watch app"
+    "start": "node ./index.js",
+    "test": "node test",
+    "build": "rimraf ./lower & babel ./app -d ./lower & cpy ./app/tmpl/* ./lower/tmpl"
   },
   "keywords": [
     "mock"
@@ -13,7 +14,6 @@
   "author": "jsyaowenlong@126.com",
   "license": "MIT",
   "dependencies": {
-    "commander": "^2.9.0",
     "debug": "^2.6.0",
     "fkill": "^5.0.0",
     "http-proxy": "^1.16.2",
@@ -23,7 +23,6 @@
     "lodash": "^4.17.4",
     "minimist": "^1.2.0",
     "mz": "^2.6.0",
-    "nedb": "^1.8.0",
     "nedb-promise": "^2.0.1",
     "resolve-path": "^1.3.3",
     "through2": "^2.0.3",
@@ -31,24 +30,23 @@
     "ws": "^1.1.1"
   },
   "devDependencies": {
-    "babel-core": "^6.22.1",
+    "babel-cli": "^6.24.1",
+    "babel-eslint": "^7.0.0",
     "babel-plugin-transform-runtime": "^6.0.0",
-    "babel-polyfill": "^6.22.0",
     "babel-preset-es2015": "^6.0.0",
     "babel-preset-stage-2": "^6.0.0",
-    "babel-register": "^6.22.0",
-    "babel-runtime": "^6.22.0",
-    "babel-eslint": "^7.0.0",
+    "cpy-cli": "^1.0.1",
     "eslint": "^3.7.1",
     "eslint-config-standard": "^6.1.0",
     "eslint-friendly-formatter": "^2.0.5",
     "eslint-loader": "^1.5.0",
     "eslint-plugin-html": "^1.3.0",
     "eslint-plugin-promise": "^3.4.0",
-    "eslint-plugin-standard": "^2.0.1"
+    "eslint-plugin-standard": "^2.0.1",
+    "rimraf": "^2.6.1"
   },
   "engines": {
-    "node": ">= 4.0.0",
+    "node": ">= 6.0.0",
     "npm": ">= 3.0.0"
   }
 }

@@ -8,6 +8,7 @@ const log = require('../middleware/log')
 
 module.exports = {
   startServerByDataBase,
+  startServerByOption,
 }
 async function findAppBase (db) {
   try {
@@ -48,6 +49,23 @@ async function startServerByDataBase (app, option) {
   return server
 }
 
+async function startServerByOption (app, option = {}) {
+  let defaultOption = {
+    port: 6000,
+    inject: false,
+    linkViews: true,
+    linkParams: {},
+  }
+  option = Object.assign({}, defaultOption, option)
+  if (option.root) {
+    option.staticPaths = option.staticPaths || []
+    option.staticPaths.unshift(option.root)
+  }
+  Object.assign(global.serverInfo.option, option)
+  let server = await startupServer(app, option)
+  return server
+}
+
 async function startupServer (app, option = {}) {
   return new Promise((resolve, reject) => {
     app.use(log())
@@ -60,13 +78,11 @@ async function startupServer (app, option = {}) {
     }))
 
     // proxy
-    if (option.proxyTable && option.proxyTable.length) {
-      app.use(require('../middleware/proxyTo').setProxyGlobal({
-        status: 404,
-        error: log.toError,
-        deal: log.logProxy,
-      }))
-    }
+    app.use(require('../middleware/proxyTo').setProxyGlobal({
+      status: 404,
+      error: log.toError,
+      deal: log.logProxy,
+    }))
 
     // static server
     if (option.staticPaths) {
@@ -102,7 +118,6 @@ async function startupServer (app, option = {}) {
       resolve()
     })
     global.serverInfo.server = httpServer
-    resolve()
     // setting dafault link
     require('./controller.inject').setLinkData()
     return httpServer

@@ -17,6 +17,7 @@ const LINK = {
 }
 
 function combineUrl (arr, commonParams) {
+  if (!Array.isArray(arr)) arr = []
   let urlArr = []
   arr.forEach((item) => {
     if (item.list) {

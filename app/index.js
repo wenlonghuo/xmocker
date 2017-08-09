@@ -11,8 +11,7 @@ class Mocker {
     this.reqList = []
   }
   start () {
-    let nv = nodeVersion()
-    let dir = nv >= 7.6 ? resolve('./starter') : resolve('./lower-start')
+    let dir = resolve('./app')
     let startArgs = [`"${dir}"`, `--option="${convertCode(JSON.stringify(this.option))}"`]
     return new Promise((resolve, reject) => {
       let server = spawn('node', startArgs, {
@@ -31,6 +30,8 @@ class Mocker {
         if (typeof msg === 'object') {
           if (msg.type === 'finish') {
             resolve(msg.data)
+          } else if (msg.type === 'console') {
+            console.log(msg)
           } else if (msg.type === 'log') {
             this.emit('log', msg)
           } else {
@@ -89,10 +90,6 @@ class Mocker {
   restart (option) {
     this.send('restart', option)
   }
-}
-
-function nodeVersion () {
-  return parseFloat(process.versions.node) || 0
 }
 
 function resolve (dir) {

@@ -1,12 +1,13 @@
 'use strict'
 
+const fs = require('fs')
 const parseURL = require('../util/url-params')
 const jsonGate = require('../plugin/json-gate/json-gate')
 const createSchema = jsonGate.createSchema
 const execFunc = require('../util/exec-func')
 const db = require('../database/')
 
-const database = {
+const common = {
   findApi: async function findApi (ctx, next) {
     const serverInfo = global.serverInfo
     // if only server, continue
@@ -15,7 +16,8 @@ const database = {
     try {
       await this.fetchApiList()
     } catch (e) {
-      return ctx.toError('后台错误')
+      console.log(e)
+      return ctx.toError('获取API列表失败', {e})
     }
 
     let api, base
@@ -46,40 +48,6 @@ const database = {
 
     return next()
   },
-
-  findFix: async function findFix (ctx, next) {
-    let { base } = ctx.matchedApi
-    let fixedApis = global.serverInfo.fixedApis
-
-    let fixData = fixedApis[base._id]
-    if (!fixData) return next()
-    let type = fixData.type
-    if (type === 1) {
-      // lib id
-      try {
-        let data = await db.dbs.Lib.cfindOne({ _id: fixData.id }).exec()
-        if (!data) return next()
-        ctx.body = data.model
-      } catch (e) {
-        return ctx.toError('指定的模板值不存在！')
-      }
-    } else if (type === 2) {
-      // ctx throw, 401， 502 etc.
-      ctx.throw(fixData.data.code, fixData.data.message)
-    } else if (type === 3) {
-      // models
-      try {
-        let model = db.dbs.models.find(item => item._id === fixData.id)
-        if (!model) return next()
-        ctx.body = model.data
-      } catch (e) {
-        return ctx.toError('指定的分支不存在！')
-      }
-    } else {
-      return next()
-    }
-  },
-
   findModel: async function findModel (ctx, next) {
     if (!ctx.matchedApi) return next()
 
@@ -87,9 +55,9 @@ const database = {
 
     let models
     try {
-      models = await db.dbs.apiModel.cfind({ baseid: base._id }).exec()
+      models = await this.fetchModelList(base)
     } catch (e) {
-      return ctx.toError('查询分支时后台出现错误')
+      return ctx.toError('查询分支失败', { e })
     }
 
     let model, targetModel
@@ -144,10 +112,48 @@ const database = {
     ctx.body = data
     return next()
   },
+}
+
+/**
+ * database type handler
+ */
+const databaseOperator = {
+  findFix: async function findFix (ctx, next) {
+    let { base } = ctx.matchedApi
+    let fixedApis = global.serverInfo.fixedApis
+
+    let fixData = fixedApis[base._id]
+    if (!fixData) return next()
+    let type = fixData.type
+    if (type === 1) {
+      // lib id
+      try {
+        let data = await db.dbs.Lib.cfindOne({ _id: fixData.id }).exec()
+        if (!data) return next()
+        ctx.body = data.model
+      } catch (e) {
+        return ctx.toError('指定的模板值不存在！')
+      }
+    } else if (type === 2) {
+      // ctx throw, 401， 502 etc.
+      ctx.throw(fixData.data.code, fixData.data.message)
+    } else if (type === 3) {
+      // models
+      try {
+        let model = db.dbs.models.find(item => item._id === fixData.id)
+        if (!model) return next()
+        ctx.body = model.data
+      } catch (e) {
+        return ctx.toError('指定的分支不存在！')
+      }
+    } else {
+      return next()
+    }
+  },
 
   fetchApiList: async function fetchApiList () {
     const serverInfo = global.serverInfo
-    const status = serverInfo
+    const status = serverInfo.status
     const source = serverInfo.option.source || {}
     if (status.isNewest && serverInfo.apiList.length) return
 
@@ -166,14 +172,119 @@ const database = {
       throw e
     }
   },
+  fetchModelList: async function fetchModelList (base) {
+    try {
+      return await db.dbs.apiModel.cfind({ baseid: base._id }).exec()
+    } catch (e) {
+      throw e
+    }
+  },
+}
+/**
+ * jsonfile type dealer
+ * format: [
+ *   {
+ *     url: '/api',
+ *     name: '',
+ *     method: 'GET',
+ *     path: 'func',
+ *     pathEqual: '',
+ *     delay: 0,
+ *     description: '',
+ *     _uid: '',
+ *     models: [
+ *       _uid: '',
+ *       name: '',
+ *       condition: '',
+ *       afterFunc: '',
+ *       inputParam: {},
+ *       outputParam: {},
+ *       data: {}
+ *     ]
+ *   }
+ * ]
+ */
+const jsonfileOperator = {
+  findFix: async function findFix (ctx, next) {
+    let { base } = ctx.matchedApi
+    let fixedApis = global.serverInfo.fixedApis
+
+    let fixData = fixedApis[base._id]
+    if (!fixData) return next()
+    let type = fixData.type
+    if (type === 1) {
+      // lib id
+      ctx.body = fixData.data
+    } else if (type === 2) {
+      // ctx throw, 401， 502 etc.
+      ctx.throw(fixData.data.code, fixData.data.message)
+    } else if (type === 3) {
+      // models
+      let model = base.models.find(item => item._uid === fixData.id)
+      if (!model) return next()
+      ctx.body = model.data
+    } else {
+      return next()
+    }
+  },
+  fetchApiList: async function fetchApiList () {
+    const serverInfo = global.serverInfo
+    const status = serverInfo.status
+    const source = serverInfo.option.source || {}
+    if (status.isNewest || !source.location) return
+
+    this.isFetching = true
+    status.isNewest = true
+    try {
+      let str = fs.readFileSync(source.location, 'utf-8')
+      serverInfo.apiList = JSON.parse(str) || []
+    } catch (e) {
+      throw e
+    }
+  },
+  fetchModelList: async function fetchModelList (base) {
+    try {
+      return base.models || []
+    } catch (e) {
+      throw e
+    }
+  },
+}
+
+/**
+ * json type dealer
+ * same with jsonfile
+ */
+const jsonOperator = {
+  fetchApiList: async function fetchApiList () {
+    const serverInfo = global.serverInfo
+    const status = serverInfo.status
+    const source = serverInfo.option.source || {}
+    if (status.isNewest) return
+
+    this.isFetching = true
+    status.isNewest = true
+    serverInfo.apiList = source.jsonData || []
+  },
 }
 
 function delay (time) {
   return new Promise(resolve => {
-    setTimeout(resolve, ~~time)
+    setTimeout(resolve, Number(time) || 0)
   })
 }
 
-module.exports = {
-  database,
+function bindAllKeys (obj) {
+  Object.keys(obj).forEach(key => {
+    if (typeof obj[key] === 'function') obj[key] = obj[key].bind(obj)
+  })
+  return obj
 }
+
+const operators = {
+  database: bindAllKeys(Object.assign({}, common, databaseOperator)),
+  jsonfile: bindAllKeys(Object.assign({}, common, jsonfileOperator)),
+  json: bindAllKeys(Object.assign({}, common, jsonfileOperator, jsonOperator)),
+}
+
+module.exports = operators

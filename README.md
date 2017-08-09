@@ -7,6 +7,7 @@
  - 输入json数据类型数据，用于少量数据测试
 
 配置参数
+ - root: 项目的根路径，当类型是数据库，且存在gulp.buildPath时，添加静态资源为buildPath后的目录，否则是root所在目录
  - port: 端口
  - source: type: 'database|jsonfile|json', 数据库id({location: xxx, projectId: xxx, commonProjs: [], jsonData}), 文件地址，json数据
  - inject: html模板注入，参数为文件地址或true(默认注入)

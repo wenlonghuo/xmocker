@@ -4,11 +4,18 @@ const app = new Koa()
 const minimist = require('minimist')
 const bodyParser = require('koa-bodyparser')()
 
-console.log = function log () {
+console.log = function log (...args) {
+  args = args.map(item => {
+    if (item instanceof Error) {
+      item = { err: item.message, stack: item.stack }
+    }
+    return item
+  })
+
   let msg = {
-    _type: 'console',
+    type: 'console',
     time: +new Date(),
-    data: arguments,
+    data: args,
   }
   process.send(msg)
 }
@@ -29,8 +36,9 @@ app.use(bodyParser)
 const actions = require('./controller/controller.comm')
 const start = require('./controller/controller.start')
 
-if (option.source && option.source.type === 'database') {
-  start.startServerByDataBase(app, option).then(data => {
+if (option.source) {
+  let starter = option.source.type === 'database' ? start.startServerByDataBase(app, option) : start.startServerByOption(app, option)
+  starter.then(data => {
     process.send({ type: 'finish', data: global.serverInfo.option })
   })
 }

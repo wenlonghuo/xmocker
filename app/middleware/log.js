@@ -62,27 +62,27 @@ function formatParam (ctx, data, option = {}) {
   return msg
 }
 
-function logError (ctx, msg, option) {
+function logError (ctx, msg, option = {}) {
   let data = formatParam(ctx, msg, option)
   data._type = 'error'
   data.level = option.level || 8
   process.send(data)
 }
 
-function toError (ctx, msg, option) {
+function toError (ctx, msg, option = {}) {
   let errorModel = JSON.stringify(serverInfo.option.errorTmpl) || '{"code": -1, "codeDesc":"${msg}", "codeDescUser":"${msg}"}'
   ctx.logE(msg, option)
   ctx.body = formatError(errorModel, msg)
 }
 
-function logHis (ctx, msg, option) {
+function logHis (ctx, msg, option = {}) {
   let data = formatParam(ctx, msg, option)
   data._type = 'his'
   data.level = option.level || 8
   process.send(data)
 }
 
-function logProxy (ctx, msg, option) {
+function logProxy (ctx, msg, option = {}) {
   let data = formatParam(ctx, msg, option)
   data._type = 'proxy'
   data.level = option.level || 8
