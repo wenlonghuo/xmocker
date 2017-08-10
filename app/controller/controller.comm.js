@@ -66,8 +66,7 @@ let actions = {
     this.response(msg._uid, serverInfo.fixedApis)
   },
   exit: function (msg) {
-    process.exit(1)
-    this.response(msg._uid)
+    process.exit(0)
   },
 }
 

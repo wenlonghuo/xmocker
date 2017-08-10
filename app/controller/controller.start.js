@@ -44,6 +44,9 @@ async function startServerByDataBase (app, option) {
   let finalOption = getOptionFromProj(proj)
   finalOption.mainPort = appConfig.mainPort || 6001
   Object.assign(gInfo.option, finalOption, option)
+  gInfo.option.commonProjs = gInfo.option.commonProjs || []
+  if (proj.parentId) gInfo.option.commonProjs.unshift(proj.parentId)
+
   gInfo.option.source.projectName = proj.name
   let server = await startupServer(app, option)
   return server

@@ -11,12 +11,11 @@ const common = {
   findApi: async function findApi (ctx, next) {
     const serverInfo = global.serverInfo
     // if only server, continue
-    if (serverInfo.option.proxyMode === 'server') return
+    if (~~serverInfo.option.proxyMode === 1) return
 
     try {
       await this.fetchApiList()
     } catch (e) {
-      console.log(e)
       return ctx.toError('获取API列表失败', {e})
     }
 
@@ -124,7 +123,7 @@ const databaseOperator = {
 
     let fixData = fixedApis[base._id]
     if (!fixData) return next()
-    let type = fixData.type
+    let type = ~~fixData.type
     if (type === 1) {
       // lib id
       try {
@@ -132,7 +131,7 @@ const databaseOperator = {
         if (!data) return next()
         ctx.body = data.model
       } catch (e) {
-        return ctx.toError('指定的模板值不存在！')
+        return ctx.toError('指定的模板值不存在！', {e})
       }
     } else if (type === 2) {
       // ctx throw, 401， 502 etc.
@@ -140,11 +139,11 @@ const databaseOperator = {
     } else if (type === 3) {
       // models
       try {
-        let model = db.dbs.models.find(item => item._id === fixData.id)
-        if (!model) return next()
+        let model = await db.dbs.apiModel.cfindOne({ _id: fixData.id }).exec()
+        if (!model) return ctx.toError('指定的分支不存在！')
         ctx.body = model.data
       } catch (e) {
-        return ctx.toError('指定的分支不存在！')
+        return ctx.toError('指定的分支不存在！', {e})
       }
     } else {
       return next()
@@ -161,10 +160,11 @@ const databaseOperator = {
     status.isNewest = true
     try {
       let currentList, commonList
-      currentList = await db.dbs.apiBase.cfind({ project: source.projectId }).sort({ name: 1 }).exec()
+      currentList = await db.dbs.apiBase.cfind({ project: source.projectId }).sort({ name: 1 }).exec() || []
       if (source.commonProjs && source.commonProjs.length) {
         commonList = await db.dbs.apiBase.cfind({ project: { $in: source.commonProjs } }).sort({ name: 1 }).exec()
       }
+      commonList = commonList || []
       serverInfo.apiList.splice(0, serverInfo.apiList.length, ...currentList, ...commonList)
       this.isFetching = false
     } catch (e) {
@@ -211,7 +211,7 @@ const jsonfileOperator = {
 
     let fixData = fixedApis[base._id]
     if (!fixData) return next()
-    let type = fixData.type
+    let type = ~~fixData.type
     if (type === 1) {
       // lib id
       ctx.body = fixData.data

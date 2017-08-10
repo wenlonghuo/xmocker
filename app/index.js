@@ -7,10 +7,12 @@ const path = require('path')
 class Mocker {
   constructor (options) {
     this.option = Object.assign({}, options)
-    this._uid = 0
+    this._uid = 1
     this.reqList = []
+    // 0 exit 1 error 2 waiting 3 success
+    this.status = 2
   }
-  start () {
+  start (log) {
     let dir = resolve('./app')
     let startArgs = [`"${dir}"`, `--option="${convertCode(JSON.stringify(this.option))}"`]
     return new Promise((resolve, reject) => {
@@ -23,26 +25,31 @@ class Mocker {
         console.error(e.toString())
       })
       server.on('exit', (code, signal) => {
-        reject({code, signal, option: this.option})
+        if (code !== 0) {
+          this.status = 1
+          reject({code, signal, option: this.option})
+        }
       })
 
       server.on('message', msg => {
         if (typeof msg === 'object') {
           if (msg.type === 'finish') {
+            this.status = 3
+            this._option = msg.data
             resolve(msg.data)
           } else if (msg.type === 'console') {
             console.log(msg)
           } else if (msg.type === 'log') {
-            this.emit('log', msg)
+            log(msg)
           } else {
-            this.reqHandler(msg)
+            this._reqHandler(msg)
           }
         }
       })
       this.server = server
     })
   }
-  reqHandler (msg) {
+  _reqHandler (msg) {
     if (msg._uid) {
       let reqIndex = this.reqList.findIndex(item => item._uid === msg._uid)
       if (~reqIndex) {
@@ -55,40 +62,48 @@ class Mocker {
       }
     }
   }
-  send (action, data) {
+  _send (action, data) {
     if (!this.server) throw new Error('server has not started!')
     let msg = { action, data, _uid: this._uid++ }
-    this.server.send(msg)
+    this.server._send(msg)
     return new Promise((resolve, reject) => {
       this.reqList.push({_uid: msg._uid, resolve, reject})
     })
   }
   reconfig (option) {
-
+    return this._send('reconfig', option)
   }
   refresh (option) {
-    this.send('refresh', option)
+    return this._send('refresh', option)
   }
   setLinkViews (option) {
-    this.send('setLinkViews', option)
+    return this._send('setLinkViews', option)
   }
   setApiReturn (option) {
-    this.send('setApiReturn', option)
+    return this._send('setApiReturn', option)
   }
   getApiReturns (option) {
-    this.send('getApiReturns', option)
+    return this._send('getApiReturns', option)
   }
   setProxyMode (option) {
-    this.send('setProxyMode', option)
+    return this._send('setProxyMode', option)
   }
   reloadApis (option) {
-    this.send('reloadApis', option)
+    return this._send('reloadApis', option)
   }
   exit (option) {
-    this.send('exit', option)
+    if (!this.server) return Promise.reject('server has not started!')
+    return new Promise((resolve, reject) => {
+      this.server.on('exit', (code, signal) => {
+        delete this.server
+        this.status = 0
+        resolve()
+      })
+      this._send('exit', option)
+    })
   }
   restart (option) {
-    this.send('restart', option)
+    return this._send('restart', option)
   }
 }
 

@@ -14,9 +14,10 @@
  - linkViews: 快速链接生成，boolean 或数组
  - linkParams: 每条链接Url公有参数
  - proxy404: 404代理地址，代理模式
- - proxyMode: local, server, mix
- - proxyRules: 代理规则
+ - proxyMode: 0: local, 1: server, 2: mix
+ - proxyTable: 代理规则
  - staticPaths: 静态资源地址
+
 方法
  - reconfig: 重设部分参数
  - refresh: function, 页面刷新接口
@@ -27,6 +28,6 @@
  - reloadApis: 数据重载接口，Json数据，jsonfile, 数据库
  - exit: 退出
  - start: 启动
- - restart: 停止
+
 event
  - 

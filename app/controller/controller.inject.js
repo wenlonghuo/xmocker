@@ -7,8 +7,9 @@ var _ = require('lodash')
 const template = _.template
 const serverInfo = global.serverInfo
 
+const htmlStr = fs.readFileSync(path.join(__dirname, '../tmpl/link.tmpl'), { encoding: 'utf-8' })
+
 const LINK = {
-  localAddr: 'http://' + serverInfo.local.ip + ':' + serverInfo.option.port,
   list: [],
   urls: [],
   configList: [],
@@ -97,8 +98,8 @@ async function storePageList (ctx, next) {
 
 async function serveView (ctx, next) {
   var query = ctx.query
-  var htmlStr = fs.readFileSync(path.join(__dirname, '../tmpl/link.tmpl'), {encoding: 'utf-8'})
-  let info = Object.assign({}, LINK, query)
+  if (!LINK.localAddr) LINK.localAddr = 'http://' + serverInfo.local.ip + ':' + serverInfo.option.port
+  let info = Object.assign({}, LINK, { query })
   let complied = template(htmlStr)
   ctx.body = complied(info)
 }

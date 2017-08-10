@@ -85,7 +85,7 @@ function setProxyGlobal ({err, deal}) {
       return
     }
     if (deal) deal.call(ctx, ctx, '代理成功', {res: data})
-    if (data !== undefined) return next()
+    if (data === undefined) return next()
   }
 }
 // 404代理，仅指出目标中间件
@@ -93,7 +93,7 @@ function proxyToGlobal ({status, err, deal}) {
   return async function (ctx, next) {
     let target = global.serverInfo.option.proxy404
     return next().then(async () => {
-      if (!target) return
+      if (!target || !~~global.serverInfo.option.proxyMode) return
       if (status === undefined || ctx.status === status) {
         let data
         try {

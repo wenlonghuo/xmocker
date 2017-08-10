@@ -1,11 +1,18 @@
 'use strict'
+function incoming (msg) {
+  try {
+    msg = JSON.parse(msg)
+  } catch (e) {
+    return
+  }
+}
 
 const ws = {
   init: function (hd) {
     hd.on('connection', this.wsConnect)
     this.wss = hd
     this.broadcast = this.broadcast.bind(this)
-    this.incoming = this.incoming.bind(this)
+    this.wsConnect = this.wsConnect.bind(this)
   },
   broadcast: function broadcast (data) {
     if (!this.wss) {
@@ -20,15 +27,7 @@ const ws = {
   },
   // websocket 初始连接函数
   wsConnect: function wsConnect (wsClient) {
-    wsClient.on('message', this.incoming)
-  },
-  // websocket 通讯
-  incoming: function incoming (msg) {
-    try {
-      msg = JSON.parse(msg)
-    } catch (e) {
-      return
-    }
+    wsClient.on('message', incoming)
   },
 }
 
