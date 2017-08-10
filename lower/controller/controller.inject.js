@@ -83,14 +83,15 @@ var storePageList = function () {
 
 var serveView = function () {
   var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3(ctx, next) {
-    var query, htmlStr, info, complied;
+    var query, info, complied;
     return _regenerator2.default.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
             query = ctx.query;
-            htmlStr = fs.readFileSync(path.join(__dirname, '../tmpl/link.tmpl'), { encoding: 'utf-8' });
-            info = Object.assign({}, LINK, query);
+
+            if (!LINK.localAddr) LINK.localAddr = 'http://' + serverInfo.local.ip + ':' + serverInfo.option.port;
+            info = Object.assign({}, LINK, { query: query });
             complied = template(htmlStr);
 
             ctx.body = complied(info);
@@ -118,8 +119,9 @@ var _ = require('lodash');
 var template = _.template;
 var serverInfo = global.serverInfo;
 
+var htmlStr = fs.readFileSync(path.join(__dirname, '../tmpl/link.tmpl'), { encoding: 'utf-8' });
+
 var LINK = {
-  localAddr: 'http://' + serverInfo.local.ip + ':' + serverInfo.option.port,
   list: [],
   urls: [],
   configList: [],

@@ -1,11 +1,19 @@
 'use strict';
 
+function incoming(msg) {
+  try {
+    msg = JSON.parse(msg);
+  } catch (e) {
+    return;
+  }
+}
+
 var ws = {
   init: function init(hd) {
     hd.on('connection', this.wsConnect);
     this.wss = hd;
     this.broadcast = this.broadcast.bind(this);
-    this.incoming = this.incoming.bind(this);
+    this.wsConnect = this.wsConnect.bind(this);
   },
   broadcast: function broadcast(data) {
     if (!this.wss) {
@@ -20,15 +28,7 @@ var ws = {
   },
 
   wsConnect: function wsConnect(wsClient) {
-    wsClient.on('message', this.incoming);
-  },
-
-  incoming: function incoming(msg) {
-    try {
-      msg = JSON.parse(msg);
-    } catch (e) {
-      return;
-    }
+    wsClient.on('message', incoming);
   }
 };
 

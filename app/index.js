@@ -97,7 +97,7 @@ class Mocker {
       this.server.on('exit', (code, signal) => {
         delete this.server
         this.status = 0
-        resolve()
+        resolve(this)
       })
       this._send('exit', option)
     })

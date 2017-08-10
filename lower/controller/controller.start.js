@@ -116,15 +116,18 @@ var startServerByDataBase = function () {
 
             finalOption.mainPort = appConfig.mainPort || 6001;
             Object.assign(gInfo.option, finalOption, option);
+            gInfo.option.commonProjs = gInfo.option.commonProjs || [];
+            if (proj.parentId) gInfo.option.commonProjs.unshift(proj.parentId);
+
             gInfo.option.source.projectName = proj.name;
-            _context3.next = 20;
+            _context3.next = 22;
             return startupServer(app, option);
 
-          case 20:
+          case 22:
             server = _context3.sent;
             return _context3.abrupt('return', server);
 
-          case 22:
+          case 24:
           case 'end':
             return _context3.stop();
         }

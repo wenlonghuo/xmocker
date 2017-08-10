@@ -35,7 +35,7 @@ var common = {
             case 0:
               serverInfo = global.serverInfo;
 
-              if (!(serverInfo.option.proxyMode === 'server')) {
+              if (!(~~serverInfo.option.proxyMode === 1)) {
                 _context.next = 3;
                 break;
               }
@@ -48,85 +48,83 @@ var common = {
               return this.fetchApiList();
 
             case 6:
-              _context.next = 12;
+              _context.next = 11;
               break;
 
             case 8:
               _context.prev = 8;
               _context.t0 = _context['catch'](3);
-
-              console.log(_context.t0);
               return _context.abrupt('return', ctx.toError('获取API列表失败', { e: _context.t0 }));
 
-            case 12:
+            case 11:
               api = void 0, base = void 0;
               apiList = serverInfo.apiList;
               params = Object.assign({}, ctx.query || {}, ctx.request.body);
               i = 0;
 
-            case 16:
+            case 15:
               if (!(i < apiList.length)) {
-                _context.next = 32;
+                _context.next = 31;
                 break;
               }
 
               api = apiList[i];
 
               if (!(api.method.toUpperCase() !== ctx.method)) {
-                _context.next = 20;
+                _context.next = 19;
                 break;
               }
 
-              return _context.abrupt('continue', 29);
+              return _context.abrupt('continue', 28);
 
-            case 20:
+            case 19:
               urlParam = parseURL(api.url, ctx.path);
 
               if (urlParam) {
-                _context.next = 23;
+                _context.next = 22;
                 break;
               }
 
-              return _context.abrupt('continue', 29);
+              return _context.abrupt('continue', 28);
 
-            case 23:
+            case 22:
               if (!api.path) {
-                _context.next = 26;
+                _context.next = 25;
                 break;
               }
 
               if (!(params[api.path] !== api.pathEqual)) {
-                _context.next = 26;
+                _context.next = 25;
                 break;
               }
 
-              return _context.abrupt('continue', 29);
+              return _context.abrupt('continue', 28);
 
-            case 26:
+            case 25:
               base = api;
               Object.assign(params, urlParam);
-              return _context.abrupt('break', 32);
+              return _context.abrupt('break', 31);
 
-            case 29:
+            case 28:
               i++;
-              _context.next = 16;
+              _context.next = 15;
               break;
 
-            case 32:
+            case 31:
               if (base) {
-                _context.next = 34;
+                _context.next = 33;
                 break;
               }
 
               return _context.abrupt('return');
 
-            case 34:
+            case 33:
 
               ctx.matchedApi = { base: base, params: params };
 
               return _context.abrupt('return', next());
 
-            case 36:
+            case 35:
             case 'end':
               return _context.stop();
           }
@@ -308,7 +306,7 @@ var databaseOperator = {
               return _context3.abrupt('return', next());
 
             case 5:
-              type = fixData.type;
+              type = ~~fixData.type;
 
               if (!(type === 1)) {
                 _context3.next = 21;
@@ -337,10 +335,10 @@ var databaseOperator = {
             case 16:
               _context3.prev = 16;
               _context3.t0 = _context3['catch'](7);
-              return _context3.abrupt('return', ctx.toError('指定的模板值不存在！'));
+              return _context3.abrupt('return', ctx.toError('指定的模板值不存在！', { e: _context3.t0 }));
 
             case 19:
-              _context3.next = 39;
+              _context3.next = 41;
               break;
 
             case 21:
@@ -350,50 +348,52 @@ var databaseOperator = {
               }
 
               ctx.throw(fixData.data.code, fixData.data.message);
-              _context3.next = 39;
+              _context3.next = 41;
               break;
 
             case 25:
               if (!(type === 3)) {
-                _context3.next = 38;
+                _context3.next = 40;
                 break;
               }
 
               _context3.prev = 26;
-              model = db.dbs.models.find(function (item) {
-                return item._id === fixData.id;
-              });
+              _context3.next = 29;
+              return db.dbs.apiModel.cfindOne({ _id: fixData.id }).exec();
+
+            case 29:
+              model = _context3.sent;
 
               if (model) {
-                _context3.next = 30;
+                _context3.next = 32;
                 break;
               }
 
-              return _context3.abrupt('return', next());
-
-            case 30:
-              ctx.body = model.data;
-              _context3.next = 36;
-              break;
-
-            case 33:
-              _context3.prev = 33;
-              _context3.t1 = _context3['catch'](26);
               return _context3.abrupt('return', ctx.toError('指定的分支不存在！'));
 
-            case 36:
-              _context3.next = 39;
+            case 32:
+              ctx.body = model.data;
+              _context3.next = 38;
               break;
 
+            case 35:
+              _context3.prev = 35;
+              _context3.t1 = _context3['catch'](26);
+              return _context3.abrupt('return', ctx.toError('指定的分支不存在！', { e: _context3.t1 }));
+
             case 38:
+              _context3.next = 41;
+              break;
+
+            case 40:
               return _context3.abrupt('return', next());
 
-            case 39:
+            case 41:
             case 'end':
               return _context3.stop();
           }
         }
-      }, _callee3, this, [[7, 16], [26, 33]]);
+      }, _callee3, this, [[7, 16], [26, 35]]);
     }));
 
     function findFix(_x5, _x6) {
@@ -432,38 +432,49 @@ var databaseOperator = {
               return db.dbs.apiBase.cfind({ project: source.projectId }).sort({ name: 1 }).exec();
 
             case 11:
-              currentList = _context4.sent;
+              _context4.t0 = _context4.sent;
 
-              if (!(source.commonProjs && source.commonProjs.length)) {
-                _context4.next = 16;
+              if (_context4.t0) {
+                _context4.next = 14;
                 break;
               }
 
-              _context4.next = 15;
+              _context4.t0 = [];
+
+            case 14:
+              currentList = _context4.t0;
+
+              if (!(source.commonProjs && source.commonProjs.length)) {
+                _context4.next = 19;
+                break;
+              }
+
+              _context4.next = 18;
               return db.dbs.apiBase.cfind({ project: { $in: source.commonProjs } }).sort({ name: 1 }).exec();
 
-            case 15:
+            case 18:
               commonList = _context4.sent;
 
-            case 16:
+            case 19:
+              commonList = commonList || [];
               (_serverInfo$apiList = serverInfo.apiList).splice.apply(_serverInfo$apiList, [0, serverInfo.apiList.length].concat((0, _toConsumableArray3.default)(currentList), (0, _toConsumableArray3.default)(commonList)));
               this.isFetching = false;
-              _context4.next = 24;
+              _context4.next = 28;
               break;
 
-            case 20:
-              _context4.prev = 20;
-              _context4.t0 = _context4['catch'](7);
+            case 24:
+              _context4.prev = 24;
+              _context4.t1 = _context4['catch'](7);
 
               this.isFetching = false;
-              throw _context4.t0;
+              throw _context4.t1;
 
-            case 24:
+            case 28:
             case 'end':
               return _context4.stop();
           }
         }
-      }, _callee4, this, [[7, 20]]);
+      }, _callee4, this, [[7, 24]]);
     }));
 
     function fetchApiList() {
@@ -526,7 +537,7 @@ var jsonfileOperator = {
               return _context6.abrupt('return', next());
 
             case 5:
-              type = fixData.type;
+              type = ~~fixData.type;
 
               if (!(type === 1)) {
                 _context6.next = 10;

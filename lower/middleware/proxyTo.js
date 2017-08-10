@@ -276,7 +276,7 @@ function setProxyGlobal(_ref8) {
             case 15:
               if (deal) deal.call(ctx, ctx, '代理成功', { res: data });
 
-              if (!(data !== undefined)) {
+              if (!(data === undefined)) {
                 _context6.next = 18;
                 break;
               }
@@ -320,7 +320,7 @@ function proxyToGlobal(_ref10) {
                   while (1) {
                     switch (_context7.prev = _context7.next) {
                       case 0:
-                        if (target) {
+                        if (!(!target || !~~global.serverInfo.option.proxyMode)) {
                           _context7.next = 2;
                           break;
                         }
