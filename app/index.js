@@ -33,13 +33,13 @@ class Mocker {
 
       server.on('message', msg => {
         if (typeof msg === 'object') {
-          if (msg.type === 'finish') {
+          if (msg.action === 'finish') {
             this.status = 3
             this._option = msg.data
             resolve(msg.data)
-          } else if (msg.type === 'console') {
+          } else if (msg.action === 'console') {
             console.log(msg)
-          } else if (msg.type === 'log') {
+          } else if (msg.action === 'log') {
             log(msg)
           } else {
             this._reqHandler(msg)

@@ -22,7 +22,7 @@ let errorExp = /\$\{msg\}/gi
 let uaParser = require('ua-parser-js')
 const serverInfo = global.serverInfo
 
-function formatParam (ctx, data, option = {}) {
+function formatParam (ctx, message, option = {}) {
   const source = serverInfo.option.source
   let base = option.base || {}
   let model = option.model || {}
@@ -31,14 +31,15 @@ function formatParam (ctx, data, option = {}) {
   ua.ip = ctx.ip
 
   let msg = {
-    time: Date.now(),
+    action: 'log',
+    time: timer(),
     args: {
       port: serverInfo.option.port,
       fsPath: source.root,
     },
     projectId: source._id,
     project: option.projectName,
-    data: data,
+    message: message,
     apiId: base._id,
     api: base.name,
     apiModelId: model._id,
@@ -50,6 +51,7 @@ function formatParam (ctx, data, option = {}) {
     },
     reqParsed: option.dealedParams,
     res: option.res || ctx.body,
+    ip: ctx.ip,
     client: ua,
     additional: option.additional,
   }
@@ -64,8 +66,7 @@ function formatParam (ctx, data, option = {}) {
 
 function logError (ctx, msg, option = {}) {
   let data = formatParam(ctx, msg, option)
-  data._type = 'error'
-  data.level = option.level || 8
+  data.type = 'error'
   process.send(data)
 }
 
@@ -77,15 +78,13 @@ function toError (ctx, msg, option = {}) {
 
 function logHis (ctx, msg, option = {}) {
   let data = formatParam(ctx, msg, option)
-  data._type = 'his'
-  data.level = option.level || 8
+  data.type = 'his'
   process.send(data)
 }
 
 function logProxy (ctx, msg, option = {}) {
   let data = formatParam(ctx, msg, option)
-  data._type = 'proxy'
-  data.level = option.level || 8
+  data.type = 'proxy'
   process.send(data)
 }
 
@@ -113,4 +112,12 @@ function formatError (model, msg) {
     console.log('项目中错误串无法转换为obj。')
   }
   return obj
+}
+
+function timer (date) {
+  if (typeof date !== 'object') date = date == null ? new Date() : new Date(date)
+  if (isNaN(date.getTime())) date = new Date()
+  date.setMinutes(date.getMinutes() - date.getTimezoneOffset())
+  let str = date.toISOString()
+  return str.slice(0, 10) + ' ' + str.slice(11, 23)
 }
