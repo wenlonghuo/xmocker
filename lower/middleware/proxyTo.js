@@ -80,7 +80,7 @@ var execProxy = function () {
             throw _context2.t0;
 
           case 9:
-            return _context2.abrupt('return', ctx.res.body || null);
+            return _context2.abrupt('return', ctx.res.proxyBody || null);
 
           case 10:
           case 'end':

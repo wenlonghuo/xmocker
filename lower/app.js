@@ -24,7 +24,7 @@ console.log = function log() {
   });
 
   var msg = {
-    type: 'console',
+    action: 'console',
     time: +new Date(),
     data: args
   };
@@ -50,7 +50,7 @@ var start = require('./controller/controller.start');
 if (option.source) {
   var starter = option.source.type === 'database' ? start.startServerByDataBase(app, option) : start.startServerByOption(app, option);
   starter.then(function (data) {
-    process.send({ type: 'finish', data: global.serverInfo.option });
+    process.send({ action: 'finish', data: global.serverInfo.option });
   });
 }
 

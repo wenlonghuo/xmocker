@@ -290,7 +290,7 @@ function getOptionFromProj(proj) {
 
   var op = {
     port: proj.port,
-    root: proj.path.trim(),
+    root: (proj.path || '').trim(),
     proxy404: proj.proxyTo,
     proxyMode: proj.proxyType || 0,
     linkViews: proj.urls,
@@ -303,7 +303,7 @@ function getOptionFromProj(proj) {
     var gulp = proj.gulp || {};
     var gulpPath = (gulp.buildPath || '').trim();
     if (gulpPath) {
-      op.staticPaths.unshift(path.join(op.root, gulp.buildPath.trim()));
+      op.staticPaths.unshift(path.join(op.root, gulpPath));
     } else {
       op.staticPaths.unshift(op.root);
     }

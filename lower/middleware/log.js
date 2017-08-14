@@ -1,5 +1,9 @@
 'use strict';
 
+var _typeof2 = require('babel-runtime/helpers/typeof');
+
+var _typeof3 = _interopRequireDefault(_typeof2);
+
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
@@ -14,7 +18,7 @@ var errorExp = /\$\{msg\}/gi;
 var uaParser = require('ua-parser-js');
 var serverInfo = global.serverInfo;
 
-function formatParam(ctx, data) {
+function formatParam(ctx, message) {
   var option = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
   var source = serverInfo.option.source;
@@ -25,14 +29,15 @@ function formatParam(ctx, data) {
   ua.ip = ctx.ip;
 
   var msg = {
-    time: Date.now(),
+    action: 'log',
+    time: timer(),
     args: {
       port: serverInfo.option.port,
       fsPath: source.root
     },
     projectId: source._id,
     project: option.projectName,
-    data: data,
+    message: message,
     apiId: base._id,
     api: base.name,
     apiModelId: model._id,
@@ -43,7 +48,8 @@ function formatParam(ctx, data) {
       method: ctx.method
     },
     reqParsed: option.dealedParams,
-    res: option.res || ctx.body,
+    res: option.res || ctx.res.proxyBody || ctx.body,
+    ip: ctx.ip,
     client: ua,
     additional: option.additional
   };
@@ -60,8 +66,7 @@ function logError(ctx, msg) {
   var option = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
   var data = formatParam(ctx, msg, option);
-  data._type = 'error';
-  data.level = option.level || 8;
+  data.type = 'error';
   process.send(data);
 }
 
@@ -77,8 +82,7 @@ function logHis(ctx, msg) {
   var option = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
   var data = formatParam(ctx, msg, option);
-  data._type = 'his';
-  data.level = option.level || 8;
+  data.type = 'his';
   process.send(data);
 }
 
@@ -86,8 +90,7 @@ function logProxy(ctx, msg) {
   var option = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
   var data = formatParam(ctx, msg, option);
-  data._type = 'proxy';
-  data.level = option.level || 8;
+  data.type = 'proxy';
   process.send(data);
 }
 
@@ -134,4 +137,12 @@ function formatError(model, msg) {
     console.log('项目中错误串无法转换为obj。');
   }
   return obj;
+}
+
+function timer(date) {
+  if ((typeof date === 'undefined' ? 'undefined' : (0, _typeof3.default)(date)) !== 'object') date = date == null ? new Date() : new Date(date);
+  if (isNaN(date.getTime())) date = new Date();
+  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+  var str = date.toISOString();
+  return str.slice(0, 10) + ' ' + str.slice(11, 23);
 }

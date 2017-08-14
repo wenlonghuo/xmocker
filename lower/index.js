@@ -53,14 +53,16 @@ var Mocker = function () {
 
         server.on('message', function (msg) {
           if ((typeof msg === 'undefined' ? 'undefined' : (0, _typeof3.default)(msg)) === 'object') {
-            if (msg.type === 'finish') {
+            if (msg.action === 'finish') {
               _this.status = 3;
               _this._option = msg.data;
               resolve(msg.data);
-            } else if (msg.type === 'console') {
+            } else if (msg.action === 'console') {
               console.log(msg);
-            } else if (msg.type === 'log') {
-              log(msg);
+            } else if (msg.action === 'log') {
+              if (log) {
+                log(msg);
+              }
             } else {
               _this._reqHandler(msg);
             }
