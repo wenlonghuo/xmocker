@@ -2,9 +2,8 @@
 
 module.exports = function execFunction (ctx, condition = '', params = {}) {
   if (condition.indexOf('return') < 0) condition = 'return ' + condition
-  let entries = Object.entries(params)
-  let keys = entries.map(en => en[0])
-  let values = entries.map(en => en[1])
+  let keys = Object.keys(params)
+  let values = Object.values(params)
   let func
 
   keys.push(condition)

@@ -11,13 +11,8 @@ module.exports = function execFunction(ctx) {
   var params = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
   if (condition.indexOf('return') < 0) condition = 'return ' + condition;
-  var entries = Object.entries(params);
-  var keys = entries.map(function (en) {
-    return en[0];
-  });
-  var values = entries.map(function (en) {
-    return en[1];
-  });
+  var keys = Object.keys(params);
+  var values = Object.values(params);
   var func = void 0;
 
   keys.push(condition);
