@@ -9,6 +9,7 @@ module.exports = function proxyTo () {
   proxy.on('proxyRes', function (proxyRes, req, res) {
     res.bufferBody = []
     if (proxyRes.headers['content-encoding']) res.isGZ = true
+    if (~proxyRes.headers['content-type'].indexOf('application/json')) res.isJSON = true
     proxyRes.pipe(through2.obj(function (chunk, enc, callback) {
       res.bufferBody.push(chunk)
       callback()
@@ -26,7 +27,16 @@ module.exports = function proxyTo () {
         if (res.bufferBody && res.bufferBody.length) {
           let buffer = Buffer.concat(res.bufferBody)
           if (res.isGZ) buffer = unzip(buffer)
-          res.body = buffer.toString('utf8')
+          let data = buffer.toString('utf8')
+
+          if (res.isJSON) {
+            try {
+              data = JSON.parse(data)
+            } catch (e) {
+
+            }
+          }
+          res.proxyBody = data
         }
         resolve()
       })

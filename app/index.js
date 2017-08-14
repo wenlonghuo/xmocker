@@ -40,7 +40,9 @@ class Mocker {
           } else if (msg.action === 'console') {
             console.log(msg)
           } else if (msg.action === 'log') {
-            log(msg)
+            if (log) {
+              log(msg)
+            }
           } else {
             this._reqHandler(msg)
           }

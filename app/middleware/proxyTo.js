@@ -35,7 +35,7 @@ async function execProxy (ctx, target) {
   } catch (e) {
     throw e
   }
-  return ctx.res.body || null
+  return ctx.res.proxyBody || null
 }
 
 // 代理分别指向不同API下的中间件

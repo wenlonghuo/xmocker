@@ -50,7 +50,7 @@ function formatParam (ctx, message, option = {}) {
       method: ctx.method,
     },
     reqParsed: option.dealedParams,
-    res: option.res || ctx.body,
+    res: option.res || ctx.res.proxyBody || ctx.body,
     ip: ctx.ip,
     client: ua,
     additional: option.additional,
