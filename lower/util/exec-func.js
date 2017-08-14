@@ -12,7 +12,9 @@ module.exports = function execFunction(ctx) {
 
   if (condition.indexOf('return') < 0) condition = 'return ' + condition;
   var keys = Object.keys(params);
-  var values = Object.values(params);
+  var values = keys.map(function (key) {
+    return params[key];
+  });
   var func = void 0;
 
   keys.push(condition);

@@ -3,7 +3,7 @@
 module.exports = function execFunction (ctx, condition = '', params = {}) {
   if (condition.indexOf('return') < 0) condition = 'return ' + condition
   let keys = Object.keys(params)
-  let values = Object.values(params)
+  let values = keys.map(key => params[key])
   let func
 
   keys.push(condition)
