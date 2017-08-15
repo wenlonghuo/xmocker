@@ -1,7 +1,8 @@
 {
-  "name": "dmock-middleware",
+  "name": "xmocker",
   "version": "1.0.0",
-  "description": "a middleware to start a dmock server quickly",
+  "description": "a middleware to start a xmock server quickly",
+  "repository": "https://github.com/wenlonghuo/xmocker",
   "main": "index.js",
   "scripts": {
     "start": "node ./index.js",
