@@ -21,7 +21,7 @@ module.exports = async function ({ctx, path, stats}, opts) {
       tmpl = fs.readFileSync(serverOption.inject, { encoding: 'utf-8' })
     }
     let complied = template(tmpl)
-    let inj = complied({ port: serverOption.port, mainPort: serverOption.mainPort, ip: sys.ip })
+    let inj = complied({ port: serverOption.port, mainPort: serverOption.mainPort || 6001, ip: sys.ip })
     html = html.replace('</head>', inj + '</head>')
     ctx.body = html
   } else {
