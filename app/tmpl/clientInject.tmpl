@@ -34,16 +34,17 @@
         if (!e) return
         var obj = {
           href: location.href,
-          UA: navigator.userAgent,
+          ua: navigator.userAgent,
           message: e.message,
           source: e.source,
           lineno: e.lineno,
+          stack: e.stack,
           colno: e.colno
         }
         setTimeout(function () {
           if (typeof $ !== 'undefined' && $.ajax) {
             $.ajax({
-              url: 'http://<%= ip + ':' + mainPort %>/error/upload',
+              url: 'http://<%= ip + ':' + mainPort %>/mock/error/upload',
               type: 'POST',
               data: obj
             })

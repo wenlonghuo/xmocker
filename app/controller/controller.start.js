@@ -64,6 +64,9 @@ async function startServerByOption (app, option = {}) {
     option.staticPaths = option.staticPaths || []
     option.staticPaths.unshift(option.root)
   }
+  if (option.inject === 'true' || option.inject === 'false') {
+    option.inject = JSON.parse(option.inject)
+  }
   Object.assign(global.serverInfo.option, option)
   let server = await startupServer(app, option)
   return server
