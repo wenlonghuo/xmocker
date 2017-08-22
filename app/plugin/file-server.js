@@ -90,17 +90,18 @@ function send (ctx, path, opts) {
         }
       }
     } catch (err) {
-      var notfound = ['ENOENT', 'ENAMETOOLONG', 'ENOTDIR'];
+      var notfound = ['ENOENT', 'ENAMETOOLONG', 'ENOTDIR']
       if (~notfound.indexOf(err.code)) return
       err.status = 500
       throw err
     }
 
-    if (setHeaders) setHeaders(ctx.res, path, stats);
+    if (setHeaders) setHeaders(ctx.res, path, stats)
 
     // stream
-    ctx.set('Content-Length', stats.size);
+    ctx.set('Content-Length', stats.size)
 
+    ctx.set('Cache-Control', 'no-cache')
     // 设置etag
     ctx.status = 200
     ctx.set('ETag', 't' + +stats.mtime + stats.size + '')
@@ -109,7 +110,6 @@ function send (ctx, path, opts) {
       return
     }
 
-    if (!ctx.response.get('Cache-Control')) ctx.set('Cache-Control', 'max-Age=' + (maxage / 1000 | 0))
     ctx.type = type(path)
 
     if (plugin) {
