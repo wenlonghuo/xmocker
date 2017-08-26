@@ -160,15 +160,18 @@ var startServerByOption = function () {
               option.staticPaths = option.staticPaths || [];
               option.staticPaths.unshift(option.root);
             }
+            if (option.inject === 'true' || option.inject === 'false') {
+              option.inject = JSON.parse(option.inject);
+            }
             Object.assign(global.serverInfo.option, option);
-            _context4.next = 6;
+            _context4.next = 7;
             return startupServer(app, option);
 
-          case 6:
+          case 7:
             server = _context4.sent;
             return _context4.abrupt('return', server);
 
-          case 8:
+          case 9:
           case 'end':
             return _context4.stop();
         }

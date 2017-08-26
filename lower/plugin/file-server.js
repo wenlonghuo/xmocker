@@ -160,20 +160,21 @@ function send(ctx, path, opts) {
 
             ctx.set('Content-Length', stats.size);
 
+            ctx.set('Cache-Control', 'no-cache');
+
             ctx.status = 200;
             ctx.set('ETag', 't' + +stats.mtime + stats.size + '');
 
             if (!ctx.fresh) {
-              _context.next = 62;
+              _context.next = 63;
               break;
             }
 
             ctx.status = 304;
             return _context.abrupt('return');
 
-          case 62:
+          case 63:
 
-            if (!ctx.response.get('Cache-Control')) ctx.set('Cache-Control', 'max-Age=' + (maxage / 1000 | 0));
             ctx.type = type(path);
 
             if (!plugin) {

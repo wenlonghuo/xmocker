@@ -39,7 +39,7 @@ module.exports = function () {
                 tmpl = fs.readFileSync(serverOption.inject, { encoding: 'utf-8' });
               }
               complied = template(tmpl);
-              inj = complied({ port: serverOption.port, mainPort: serverOption.mainPort, ip: sys.ip });
+              inj = complied({ port: serverOption.port, mainPort: serverOption.mainPort || 6001, ip: sys.ip });
 
               html = html.replace('</head>', inj + '</head>');
               ctx.body = html;
