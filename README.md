@@ -13,6 +13,7 @@
  - inject: html模板注入，参数为文件地址或true(默认注入)
  - linkViews: 快速链接生成，boolean 或数组
  - linkParams: 每条链接Url公有参数
+ - history: 针对页面启用history模式，boolean情况下取root下面的index.html，string类型则取输入的路径（1.1新增）
  - proxy404: 404代理地址，代理模式
  - proxyMode: 0: local, 1: server, 2: mix
  - proxyTable: 代理规则
