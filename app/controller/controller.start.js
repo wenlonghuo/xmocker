@@ -64,9 +64,9 @@ async function startServerByOption (app, option = {}) {
     option.staticPaths = option.staticPaths || []
     option.staticPaths.unshift(option.root)
   }
-  if (option.inject === 'true' || option.inject === 'false') {
-    option.inject = JSON.parse(option.inject)
-  }
+
+  option.inject = evalStringBool(option.inject)
+  option.history = evalStringBool(option.history)
   Object.assign(global.serverInfo.option, option)
   let server = await startupServer(app, option)
   return server
@@ -89,6 +89,25 @@ async function startupServer (app, option = {}) {
       error: log.toError,
       deal: log.logProxy,
     }))
+
+    // history 模式
+    if (option.history) {
+      const redirectPath = typeof option.history === 'boolean' ? '/' : option.history
+      app.use(async function (ctx, next) {
+        return next().then(async function () {
+          let accept = ctx.headers['accept']
+          if (ctx.status !== 404 || !~accept.indexOf('text/html')) return
+          const sendAsync = sendFile(ctx, redirectPath, {
+            root: option.root,
+            index: 'index.html',
+            serverOption: option,
+            plugin: htmlInject,
+          })
+
+          await sendAsync()
+        })
+      })
+    }
 
     // static server
     if (option.staticPaths) {
@@ -154,4 +173,11 @@ function getOptionFromProj (proj, source = {}) {
   }
 
   return op
+}
+
+function evalStringBool (str) {
+  if (str === 'true' || str === 'false') {
+    return JSON.parse(str)
+  }
+  return str
 }

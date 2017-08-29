@@ -73,8 +73,9 @@ const common = {
       }
       // 格式化输入参数
       try {
-        if (model.inputParam && Object.keys(model.inputParam).length) {
-          createSchema(model.inputParam).format(params)
+        let inputParam = model.inputParam || base.inputParam
+        if (inputParam && Object.keys(inputParam).length) {
+          createSchema(inputParam).format(params)
         }
         if (execFunc(ctx, condition, params)) {
           targetModel = model
@@ -85,9 +86,10 @@ const common = {
       }
     }
 
-    if (!targetModel) return ctx.toError('该API暂无数据', { base, params })
+    if (!targetModel && base.data == null) return ctx.toError('该API暂无数据', { base, params })
+    let sourceModel = targetModel || base
 
-    let data = targetModel.data
+    let data = sourceModel.data || base.data
     if (typeof data === 'string') {
       try {
         data = JSON.parse(data)
@@ -96,16 +98,16 @@ const common = {
       }
     }
 
-    let afterFunc = (targetModel.afterFunc || '').trim()
+    let afterFunc = (sourceModel.afterFunc || base.afterFunc || '').trim()
     if (afterFunc) {
       try {
         let dealedResult = execFunc(ctx, afterFunc, { params, data })
         if (typeof dealedResult === 'object') data = dealedResult
       } catch (e) {
-        return ctx.toError(e, { base, model, params, e })
+        return ctx.toError(e, { base, model: targetModel, params, e })
       }
     }
-    ctx.log('获取api数据成功：' + base.name, { base, model, params, res: data })
+    ctx.log('获取api数据成功：' + base.name, { base, model: targetModel, params, res: data })
 
     await delay(base.delay)
     ctx.body = data
