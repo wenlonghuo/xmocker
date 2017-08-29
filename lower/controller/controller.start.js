@@ -160,18 +160,18 @@ var startServerByOption = function () {
               option.staticPaths = option.staticPaths || [];
               option.staticPaths.unshift(option.root);
             }
-            if (option.inject === 'true' || option.inject === 'false') {
-              option.inject = JSON.parse(option.inject);
-            }
+
+            option.inject = evalStringBool(option.inject);
+            option.history = evalStringBool(option.history);
             Object.assign(global.serverInfo.option, option);
-            _context4.next = 7;
+            _context4.next = 8;
             return startupServer(app, option);
 
-          case 7:
+          case 8:
             server = _context4.sent;
             return _context4.abrupt('return', server);
 
-          case 9:
+          case 10:
           case 'end':
             return _context4.stop();
         }
@@ -185,13 +185,13 @@ var startServerByOption = function () {
 }();
 
 var startupServer = function () {
-  var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee6(app) {
+  var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee8(app) {
     var option = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    return _regenerator2.default.wrap(function _callee6$(_context6) {
+    return _regenerator2.default.wrap(function _callee8$(_context8) {
       while (1) {
-        switch (_context6.prev = _context6.next) {
+        switch (_context8.prev = _context8.next) {
           case 0:
-            return _context6.abrupt('return', new Promise(function (resolve, reject) {
+            return _context8.abrupt('return', new Promise(function (resolve, reject) {
               app.use(log());
 
               app.use(require('../middleware/proxyTo').proxyToGlobal({
@@ -206,6 +206,61 @@ var startupServer = function () {
                 deal: log.logProxy
               }));
 
+              if (option.history) {
+                var redirectPath = typeof option.history === 'boolean' ? '/' : option.history;
+                app.use(function () {
+                  var _ref6 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee6(ctx, next) {
+                    return _regenerator2.default.wrap(function _callee6$(_context6) {
+                      while (1) {
+                        switch (_context6.prev = _context6.next) {
+                          case 0:
+                            return _context6.abrupt('return', next().then((0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5() {
+                              var accept, sendAsync;
+                              return _regenerator2.default.wrap(function _callee5$(_context5) {
+                                while (1) {
+                                  switch (_context5.prev = _context5.next) {
+                                    case 0:
+                                      accept = ctx.headers['accept'];
+
+                                      if (!(ctx.status !== 404 || !~accept.indexOf('text/html'))) {
+                                        _context5.next = 3;
+                                        break;
+                                      }
+
+                                      return _context5.abrupt('return');
+
+                                    case 3:
+                                      sendAsync = sendFile(ctx, redirectPath, {
+                                        root: option.root,
+                                        index: 'index.html',
+                                        serverOption: option,
+                                        plugin: htmlInject
+                                      });
+                                      _context5.next = 6;
+                                      return sendAsync();
+
+                                    case 6:
+                                    case 'end':
+                                      return _context5.stop();
+                                  }
+                                }
+                              }, _callee5, this);
+                            }))));
+
+                          case 1:
+                          case 'end':
+                            return _context6.stop();
+                        }
+                      }
+                    }, _callee6, this);
+                  }));
+
+                  return function (_x10, _x11) {
+                    return _ref6.apply(this, arguments);
+                  };
+                }());
+              }
+
               if (option.staticPaths) {
                 option.staticPaths.forEach(function (dir) {
                   var absDir = dir.trim();
@@ -214,12 +269,12 @@ var startupServer = function () {
                   }
 
                   app.use(function () {
-                    var _ref6 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5(ctx, next) {
-                      return _regenerator2.default.wrap(function _callee5$(_context5) {
+                    var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7(ctx, next) {
+                      return _regenerator2.default.wrap(function _callee7$(_context7) {
                         while (1) {
-                          switch (_context5.prev = _context5.next) {
+                          switch (_context7.prev = _context7.next) {
                             case 0:
-                              return _context5.abrupt('return', next().then(sendFile(ctx, ctx.path, {
+                              return _context7.abrupt('return', next().then(sendFile(ctx, ctx.path, {
                                 root: absDir,
                                 index: 'index.html',
                                 serverOption: option,
@@ -228,14 +283,14 @@ var startupServer = function () {
 
                             case 1:
                             case 'end':
-                              return _context5.stop();
+                              return _context7.stop();
                           }
                         }
-                      }, _callee5, this);
+                      }, _callee7, this);
                     }));
 
-                    return function (_x10, _x11) {
-                      return _ref6.apply(this, arguments);
+                    return function (_x12, _x13) {
+                      return _ref8.apply(this, arguments);
                     };
                   }());
                 });
@@ -262,10 +317,10 @@ var startupServer = function () {
 
           case 1:
           case 'end':
-            return _context6.stop();
+            return _context8.stop();
         }
       }
-    }, _callee6, this);
+    }, _callee8, this);
   }));
 
   return function startupServer(_x8) {
@@ -313,4 +368,11 @@ function getOptionFromProj(proj) {
   }
 
   return op;
+}
+
+function evalStringBool(str) {
+  if (str === 'true' || str === 'false') {
+    return JSON.parse(str);
+  }
+  return str;
 }
