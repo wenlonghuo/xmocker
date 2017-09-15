@@ -6,6 +6,7 @@ const jsonGate = require('../plugin/json-gate/json-gate')
 const createSchema = jsonGate.createSchema
 const execFunc = require('../util/exec-func')
 const db = require('../database/')
+const _ = require('lodash')
 
 const common = {
   findApi: async function findApi (ctx, next) {
@@ -50,7 +51,9 @@ const common = {
   findModel: async function findModel (ctx, next) {
     if (!ctx.matchedApi) return next()
 
-    let { base, params } = ctx.matchedApi
+    let { base, params: oriParams } = ctx.matchedApi
+
+    let finalParams
 
     let models
     try {
@@ -61,7 +64,7 @@ const common = {
 
     let model, targetModel
 
-    // 获取不同条件的api
+    // 获取目标MODEL
     for (let i = 0; i < models.length; i++) {
       model = models[i]
       let condition = model.condition || ''
@@ -73,11 +76,13 @@ const common = {
       }
       // 格式化输入参数
       try {
+        let params = _.cloneDeep(oriParams)
         let inputParam = model.inputParam || base.inputParam
         if (inputParam && Object.keys(inputParam).length) {
           createSchema(inputParam).format(params)
         }
         if (execFunc(ctx, condition, params)) {
+          finalParams = params
           targetModel = model
           break
         }
@@ -86,18 +91,41 @@ const common = {
       }
     }
 
-    if (!targetModel && base.data == null) return ctx.toError('该API暂无数据', { base, params })
-    let sourceModel = targetModel || base
+    // 不存在或者base的data为空
+    if (!targetModel && base.data == null && !base.afterFunc.trim() && !base.outputParam) {
+      return ctx.toError('该API暂无数据', { base, params })
+    }
 
-    let data = sourceModel.data || base.data
-    if (typeof data === 'string') {
-      try {
-        data = JSON.parse(data)
-      } catch (e) {
-        console.log('数据转换为JSON出错', data)
+    let sourceModel = targetModel || base
+    let params = finalParams
+
+    // 参数没有进行校验，则复制原始参数，并根据base中数据进行校验
+    if (!params) {
+      params = _.cloneDeep(oriParams)
+      let schema = sourceModel.inputParam || base.inputParam
+      if (schema && Object.keys(schema).length) {
+        try {
+          createSchema(schema).format(params)
+        } catch (e) {
+          return ctx.toError(e, { base, model, params, e })
+        }
       }
     }
 
+    // 获取已经存储的mock数据
+    let mockData = sourceModel.data || base.data
+    if (typeof mockData === 'string') {
+      try {
+        mockData = JSON.parse(mockData)
+      } catch (e) {
+        console.log('数据转换为JSON出错', mockData)
+      }
+    }
+
+    // object形式数据进行复制一份
+    let data = typeof mockData === 'object' && mockData != null ? _.cloneDeep(mockData) : mockData
+
+    // 执行输出处理函数
     let afterFunc = (sourceModel.afterFunc || base.afterFunc || '').trim()
     if (afterFunc) {
       try {
@@ -109,6 +137,7 @@ const common = {
     }
     ctx.log('获取api数据成功：' + base.name, { base, model: targetModel, params, res: data })
 
+    // 执行延迟
     await delay(base.delay)
     ctx.body = data
     return next()
