@@ -24,6 +24,7 @@ var jsonGate = require('../plugin/json-gate/json-gate');
 var createSchema = jsonGate.createSchema;
 var execFunc = require('../util/exec-func');
 var db = require('../database/');
+var _ = require('lodash');
 
 var common = {
   findApi: function () {
@@ -140,7 +141,7 @@ var common = {
   }(),
   findModel: function () {
     var _ref2 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(ctx, next) {
-      var _ctx$matchedApi, base, params, models, model, targetModel, i, condition, inputParam, sourceModel, data, afterFunc, dealedResult;
+      var _ctx$matchedApi, base, oriParams, finalParams, models, model, targetModel, i, condition, _params, inputParam, sourceModel, params, schema, mockData, data, afterFunc, dealedResult;
 
       return _regenerator2.default.wrap(function _callee2$(_context2) {
         while (1) {
@@ -154,29 +155,30 @@ var common = {
               return _context2.abrupt('return', next());
 
             case 2:
-              _ctx$matchedApi = ctx.matchedApi, base = _ctx$matchedApi.base, params = _ctx$matchedApi.params;
+              _ctx$matchedApi = ctx.matchedApi, base = _ctx$matchedApi.base, oriParams = _ctx$matchedApi.params;
+              finalParams = void 0;
               models = void 0;
-              _context2.prev = 4;
-              _context2.next = 7;
+              _context2.prev = 5;
+              _context2.next = 8;
               return this.fetchModelList(base);
 
-            case 7:
+            case 8:
               models = _context2.sent;
-              _context2.next = 13;
+              _context2.next = 14;
               break;
 
-            case 10:
-              _context2.prev = 10;
-              _context2.t0 = _context2['catch'](4);
+            case 11:
+              _context2.prev = 11;
+              _context2.t0 = _context2['catch'](5);
               return _context2.abrupt('return', ctx.toError('查询分支失败', { e: _context2.t0 }));
 
-            case 13:
+            case 14:
               model = void 0, targetModel = void 0;
               i = 0;
 
-            case 15:
+            case 16:
               if (!(i < models.length)) {
-                _context2.next = 36;
+                _context2.next = 39;
                 break;
               }
 
@@ -186,98 +188,128 @@ var common = {
               condition = condition.trim();
 
               if (!(condition === '')) {
-                _context2.next = 22;
+                _context2.next = 23;
                 break;
               }
 
               targetModel = model;
-              return _context2.abrupt('continue', 33);
+              return _context2.abrupt('continue', 36);
 
-            case 22:
-              _context2.prev = 22;
+            case 23:
+              _context2.prev = 23;
+              _params = _.cloneDeep(oriParams);
               inputParam = model.inputParam || base.inputParam;
 
               if (inputParam && Object.keys(inputParam).length) {
-                createSchema(inputParam).format(params);
+                createSchema(inputParam).format(_params);
               }
 
-              if (!execFunc(ctx, condition, params)) {
-                _context2.next = 28;
+              if (!execFunc(ctx, condition, _params)) {
+                _context2.next = 31;
                 break;
               }
 
+              finalParams = _params;
               targetModel = model;
-              return _context2.abrupt('break', 36);
+              return _context2.abrupt('break', 39);
 
-            case 28:
-              _context2.next = 33;
+            case 31:
+              _context2.next = 36;
               break;
-
-            case 30:
-              _context2.prev = 30;
-              _context2.t1 = _context2['catch'](22);
-              return _context2.abrupt('return', ctx.toError(_context2.t1, { base: base, model: model, params: params, e: _context2.t1 }));
 
             case 33:
-              i++;
-              _context2.next = 15;
-              break;
+              _context2.prev = 33;
+              _context2.t1 = _context2['catch'](23);
+              return _context2.abrupt('return', ctx.toError(_context2.t1, { base: base, model: model, params: params, e: _context2.t1 }));
 
             case 36:
-              if (!(!targetModel && base.data == null)) {
-                _context2.next = 38;
+              i++;
+              _context2.next = 16;
+              break;
+
+            case 39:
+              if (!(!targetModel && base.data == null && !base.afterFunc.trim() && !base.outputParam)) {
+                _context2.next = 41;
                 break;
               }
 
               return _context2.abrupt('return', ctx.toError('该API暂无数据', { base: base, params: params }));
 
-            case 38:
+            case 41:
               sourceModel = targetModel || base;
-              data = sourceModel.data || base.data;
+              params = finalParams;
 
-              if (typeof data === 'string') {
-                try {
-                  data = JSON.parse(data);
-                } catch (e) {
-                  console.log('数据转换为JSON出错', data);
-                }
-              }
-
-              afterFunc = (sourceModel.afterFunc || base.afterFunc || '').trim();
-
-              if (!afterFunc) {
-                _context2.next = 51;
+              if (params) {
+                _context2.next = 54;
                 break;
               }
 
-              _context2.prev = 43;
+              params = _.cloneDeep(oriParams);
+              schema = sourceModel.inputParam || base.inputParam;
+
+              if (!(schema && Object.keys(schema).length)) {
+                _context2.next = 54;
+                break;
+              }
+
+              _context2.prev = 47;
+
+              createSchema(schema).format(params);
+              _context2.next = 54;
+              break;
+
+            case 51:
+              _context2.prev = 51;
+              _context2.t2 = _context2['catch'](47);
+              return _context2.abrupt('return', ctx.toError(_context2.t2, { base: base, model: model, params: params, e: _context2.t2 }));
+
+            case 54:
+              mockData = sourceModel.data || base.data;
+
+              if (typeof mockData === 'string') {
+                try {
+                  mockData = JSON.parse(mockData);
+                } catch (e) {
+                  console.log('数据转换为JSON出错', mockData);
+                }
+              }
+
+              data = (typeof mockData === 'undefined' ? 'undefined' : (0, _typeof3.default)(mockData)) === 'object' && mockData != null ? _.cloneDeep(mockData) : mockData;
+              afterFunc = (sourceModel.afterFunc || base.afterFunc || '').trim();
+
+              if (!afterFunc) {
+                _context2.next = 67;
+                break;
+              }
+
+              _context2.prev = 59;
               dealedResult = execFunc(ctx, afterFunc, { params: params, data: data });
 
               if ((typeof dealedResult === 'undefined' ? 'undefined' : (0, _typeof3.default)(dealedResult)) === 'object') data = dealedResult;
-              _context2.next = 51;
+              _context2.next = 67;
               break;
 
-            case 48:
-              _context2.prev = 48;
-              _context2.t2 = _context2['catch'](43);
-              return _context2.abrupt('return', ctx.toError(_context2.t2, { base: base, model: targetModel, params: params, e: _context2.t2 }));
+            case 64:
+              _context2.prev = 64;
+              _context2.t3 = _context2['catch'](59);
+              return _context2.abrupt('return', ctx.toError(_context2.t3, { base: base, model: targetModel, params: params, e: _context2.t3 }));
 
-            case 51:
+            case 67:
               ctx.log('获取api数据成功：' + base.name, { base: base, model: targetModel, params: params, res: data });
 
-              _context2.next = 54;
+              _context2.next = 70;
               return delay(base.delay);
 
-            case 54:
+            case 70:
               ctx.body = data;
               return _context2.abrupt('return', next());
 
-            case 56:
+            case 72:
             case 'end':
               return _context2.stop();
           }
         }
-      }, _callee2, this, [[4, 10], [22, 30], [43, 48]]);
+      }, _callee2, this, [[5, 11], [23, 33], [47, 51], [59, 64]]);
     }));
 
     function findModel(_x3, _x4) {
