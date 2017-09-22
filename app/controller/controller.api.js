@@ -98,43 +98,16 @@ const common = {
 
     let sourceModel = targetModel || base
     let params = finalParams
+    let data
 
-    // 参数没有进行校验，则复制原始参数，并根据base中数据进行校验
-    if (!params) {
-      params = _.cloneDeep(oriParams)
-      let schema = sourceModel.inputParam || base.inputParam
-      if (schema && Object.keys(schema).length) {
-        try {
-          createSchema(schema).format(params)
-        } catch (e) {
-          return ctx.toError(e, { base, model, params, e })
-        }
-      }
+    try {
+      let result = getFinalData({ sourceModel, base, oriParams, parsedParams: finalParams, ctx })
+      params = result.params
+      data = result.data
+    } catch (e) {
+      return ctx.toError(e, { base, model, params, e })
     }
 
-    // 获取已经存储的mock数据
-    let mockData = sourceModel.data || base.data
-    if (typeof mockData === 'string') {
-      try {
-        mockData = JSON.parse(mockData)
-      } catch (e) {
-        console.log('数据转换为JSON出错', mockData)
-      }
-    }
-
-    // object形式数据进行复制一份
-    let data = typeof mockData === 'object' && mockData != null ? _.cloneDeep(mockData) : mockData
-
-    // 执行输出处理函数
-    let afterFunc = (sourceModel.afterFunc || base.afterFunc || '').trim()
-    if (afterFunc) {
-      try {
-        let dealedResult = execFunc(ctx, afterFunc, { params, data })
-        if (typeof dealedResult === 'object') data = dealedResult
-      } catch (e) {
-        return ctx.toError(e, { base, model: targetModel, params, e })
-      }
-    }
     ctx.log('获取api数据成功：' + base.name, { base, model: targetModel, params, res: data })
 
     // 执行延迟
@@ -149,7 +122,7 @@ const common = {
  */
 const databaseOperator = {
   findFix: async function findFix (ctx, next) {
-    let { base } = ctx.matchedApi
+    let { base, params } = ctx.matchedApi
     let fixedApis = global.serverInfo.fixedApis
 
     let fixData = fixedApis[base._id]
@@ -160,7 +133,7 @@ const databaseOperator = {
       try {
         let data = await db.dbs.Lib.cfindOne({ _id: fixData.id }).exec()
         if (!data) return next()
-        ctx.body = data.model
+        ctx.body = convertStrToJSON(data.model)
       } catch (e) {
         return ctx.toError('指定的模板值不存在！', {e})
       }
@@ -170,11 +143,20 @@ const databaseOperator = {
     } else if (type === 3) {
       // models
       try {
-        let model = await db.dbs.apiModel.cfindOne({ _id: fixData.id }).exec()
-        if (!model) return ctx.toError('指定的分支不存在！')
-        ctx.body = model.data
+        let data, model
+        if (String(fixData.id) !== '0') {
+          model = await db.dbs.apiModel.cfindOne({ _id: fixData.id }).exec()
+          if (!model) return ctx.toError('指定的分支不存在！')
+        }
+        try {
+          let result = getFinalData({ sourceModel: model, base, oriParams: params, ctx })
+          data = result.data
+        } catch (e) {
+          return ctx.toError(e, { base, model, params, e })
+        }
+        ctx.body = data
       } catch (e) {
-        return ctx.toError('指定的分支不存在！', {e})
+        return ctx.toError('查询出错啦~~', {e})
       }
     } else {
       return next()
@@ -299,9 +281,44 @@ const jsonOperator = {
   },
 }
 
+function getFinalData ({sourceModel = {}, base, oriParams, parsedParams, ctx}) {
+  // 参数没有进行校验，则复制原始参数，并根据base中数据进行校验
+  let params = parsedParams
+  if (!params) {
+    params = _.cloneDeep(oriParams)
+    let schema = sourceModel.inputParam || base.inputParam
+    if (schema && Object.keys(schema).length) {
+      createSchema(schema).format(params)
+    }
+  }
+  // 获取已经存储的mock数据
+  let mockData = sourceModel.data || base.data
+  if (typeof mockData === 'string') {
+    try {
+      mockData = JSON.parse(mockData)
+    } catch (e) {
+      console.log('数据转换为JSON出错', mockData)
+    }
+  }
+
+  // object形式数据进行复制一份
+  let data = typeof mockData === 'object' && mockData != null ? _.cloneDeep(mockData) : mockData
+
+  // 执行输出处理函数
+  let afterFunc = (sourceModel.afterFunc || base.afterFunc || '').trim()
+  if (afterFunc) {
+    let dealedResult = execFunc(ctx, afterFunc, { params, data })
+    if (typeof dealedResult === 'object') data = dealedResult
+  }
+
+  return {data, params}
+}
+
 function delay (time) {
+  time = Number(time) || 0
+  if (!time) return Promise.resolve()
   return new Promise(resolve => {
-    setTimeout(resolve, Number(time) || 0)
+    setTimeout(resolve, time)
   })
 }
 
@@ -310,6 +327,14 @@ function bindAllKeys (obj) {
     if (typeof obj[key] === 'function') obj[key] = obj[key].bind(obj)
   })
   return obj
+}
+
+function convertStrToJSON (str) {
+  try {
+    return JSON.parse(str)
+  } catch (e) {
+    return str
+  }
 }
 
 const operators = {
