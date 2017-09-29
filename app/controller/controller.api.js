@@ -92,7 +92,7 @@ const common = {
     }
 
     // 不存在或者base的data为空
-    if (!targetModel && base.data == null && !base.afterFunc.trim() && !base.outputParam) {
+    if (!targetModel && base.data == null && !(base.afterFunc || '').trim() && !base.outputParam) {
       return ctx.toError('该API暂无数据', { base, params })
     }
 
