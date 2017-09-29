@@ -28,11 +28,11 @@ module.exports = function proxyTo () {
           let buffer = Buffer.concat(res.bufferBody)
           let data
           try {
-            if (res.isGZ) buffer = unzip(buffer)
-            data = buffer.toString('utf8')
+            buffer = unzip(buffer)
           } catch (e) {
-
           }
+
+          data = buffer.toString('utf8')
 
           if (res.isJSON) {
             try {
