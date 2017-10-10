@@ -63,6 +63,7 @@ const common = {
     }
 
     let model, targetModel
+    let params = oriParams
 
     // 获取目标MODEL
     for (let i = 0; i < models.length; i++) {
@@ -92,12 +93,12 @@ const common = {
     }
 
     // 不存在或者base的data为空
-    if (!targetModel && base.data == null && !base.afterFunc.trim() && !base.outputParam) {
+    if (!targetModel && base.data == null && !(base.afterFunc || '').trim() && !base.outputParam) {
       return ctx.toError('该API暂无数据', { base, params })
     }
 
-    let sourceModel = targetModel || base
-    let params = finalParams
+    let sourceModel = targetModel || base || {}
+    params = finalParams
     let data
 
     try {
