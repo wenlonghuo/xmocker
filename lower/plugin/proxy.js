@@ -11,12 +11,12 @@ var through2 = require('through2');
 var unzip = require('zlib').unzipSync;
 
 module.exports = function proxyTo() {
-  var proxy = httpProxy.createProxyServer({ changeOrigin: true });
+  var proxy = httpProxy.createProxyServer({ changeOrigin: true, preserveHeaderKeyCase: true });
   var web = proxy.web;
   proxy.on('proxyRes', function (proxyRes, req, res) {
     res.bufferBody = [];
-    if (proxyRes.headers['content-encoding']) res.isGZ = true;
-    if (~proxyRes.headers['content-type'].indexOf('application/json')) res.isJSON = true;
+    if (proxyRes.headers['accept-encoding'] && proxyRes.headers['accept-encoding'].indexOf('gzip')) res.isGZ = true;
+    if (proxyRes.headers['content-type'] && ~proxyRes.headers['content-type'].indexOf('application/json')) res.isJSON = true;
     proxyRes.pipe(through2.obj(function (chunk, enc, callback) {
       res.bufferBody.push(chunk);
       callback();
@@ -33,8 +33,12 @@ module.exports = function proxyTo() {
       res.on('finish', function () {
         if (res.bufferBody && res.bufferBody.length) {
           var buffer = Buffer.concat(res.bufferBody);
-          if (res.isGZ) buffer = unzip(buffer);
-          var data = buffer.toString('utf8');
+          var data = void 0;
+          try {
+            buffer = unzip(buffer);
+          } catch (e) {}
+
+          data = buffer.toString('utf8');
 
           if (res.isJSON) {
             try {
