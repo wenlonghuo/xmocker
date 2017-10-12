@@ -15,21 +15,22 @@ function genDb () {
   fs.writeFileSync(resolve('project'), JSON.stringify(project))
   let projectId = project._id
   let baseData = dbData.map(api => {
-    return Object.assign({}, api, {
+    return JSON.stringify(Object.assign({}, api, {
       models: undefined,
       project: projectId,
-    })
+    }))
   })
-  fs.writeFileSync(resolve('apiBase'), JSON.stringify(baseData))
+
+  fs.writeFileSync(resolve('apiBase'), baseData.join('\n'))
 
   let modelData = []
   dbData.forEach(api => {
     let models = api.models
     models.forEach(model => {
-      modelData.push(model)
+      modelData.push(JSON.stringify(model))
     })
   })
-  fs.writeFileSync(resolve('apiModel'), JSON.stringify(modelData))
+  fs.writeFileSync(resolve('apiModel'), modelData.join('\n'))
 
   return project
 }

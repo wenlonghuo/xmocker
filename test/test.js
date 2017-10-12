@@ -8,6 +8,7 @@ const axios = require('axios')
 const sourceDir = path.join(__dirname, 'source')
 const pageDir = path.join(sourceDir, 'page')
 const genDb = require('./genDb')
+const testApi = require('./testApi')
 
 describe('server by json type', function () {
   const dir = path.join(__dirname, './source/json/onApi.json')
@@ -18,7 +19,7 @@ describe('server by json type', function () {
     await serverjson.start()
   })
 
-  require('./testApi')
+  testApi()
 
   describe('test interface', function () {
     it('reconfig', async function () {
@@ -57,24 +58,27 @@ describe('server by db', function () {
     this.timeout(10000)
     serverjson = new Mocker({ source: { type: 'database', location: dir, projectId: project._id } })
     await serverjson.start()
+    await serverjson.reconfig({
+      inject: false,
+    })
   })
 
-  // require('./testApi')
+  testApi()
 
   describe('test interface', function () {
     this.timeout(10000)
     it('reconfig', async function () {
       await serverjson.reconfig({
-        inject: false,
-      })
-      let data = await axios.get(serverUrl)
-      assert.equal(data.data, '<html><head></head></head></html>')
-
-      await serverjson.reconfig({
         inject: true,
       })
       let res = await axios.get(serverUrl)
       assert.notEqual(res.data, '<html><head></head></head></html>')
+
+      await serverjson.reconfig({
+        inject: false,
+      })
+      let data = await axios.get(serverUrl)
+      assert.equal(data.data, '<html><head></head></head></html>')
     })
 
     it('refresh', function (done) {

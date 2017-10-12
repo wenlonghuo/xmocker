@@ -40,7 +40,7 @@
     "models": []
   },
   {
-    "url": "/api",
+    "url": "/apiSecondPath",
     "method": "POST",
     "path": "func",
     "pathEqual": "secondPath",
@@ -66,10 +66,10 @@
     "description": "一个model，类型为Post的API, 有默认的model",
     "_uid": "bal0t19i940k",
     "_mt": 1505377294532,
-    "_id": "ZN49Co3sf2odaALT",
+    "_id": "ZN41Co3sf2odaALT",
     "models": [
       {
-        "baseid": "ZN49Co3sf2odaALT",
+        "baseid": "ZN41Co3sf2odaALT",
         "_uid": "bal0t19iujkk",
         "name": "主干",
         "condition": "",
