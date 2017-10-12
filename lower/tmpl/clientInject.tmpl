@@ -2,7 +2,7 @@
   (function () {
     if (WebSocket) {
       function initSocket () {
-        var socket = new WebSocket('ws://' + location.host)
+        var socket = new WebSocket('ws://' + location.host + '/webClient')
         socket.onopen = function (event) {
           socket.onmessage = function (msg) {
             try {

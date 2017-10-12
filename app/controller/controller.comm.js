@@ -1,16 +1,19 @@
 'use strict'
 
 const serverInfo = global.serverInfo
-const wsctrl = require('./controller.ws')
+let wsctrl
 const inject = require('./controller.inject')
 const db = require('../database')
 
 let actions = {
+  init () {
+    wsctrl = require('./controller.ws')
+  },
   response: function (uid, data) {
-    process.send({_uid: uid, status: 0, data: data})
+    wsctrl.broadToOwner({_uid: uid, status: 0, data: data})
   },
   error: function (uid, data, status) {
-    process.send({_uid: uid, status: status || 1, data: data})
+    wsctrl.broadToOwner({_uid: uid, status: status || 1, data: data})
   },
   reconfig: function (msg) {
     Object.assign(serverInfo.option, msg.data)

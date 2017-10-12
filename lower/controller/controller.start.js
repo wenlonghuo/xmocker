@@ -300,11 +300,7 @@ var startupServer = function () {
 
               var httpServer = http.createServer(app.callback());
 
-              var WebSocket = require('ws');
-
-              var wss = new WebSocket.Server({ server: httpServer });
-              var wsctrl = require('./controller.ws.js');
-              wsctrl.init(wss);
+              wsctrl.init(httpServer);
 
               httpServer.listen(option.port, function (e) {
                 resolve();
@@ -336,6 +332,7 @@ var http = require('http');
 var sendFile = require('../plugin/file-server');
 var htmlInject = require('../util/file-server-inject');
 var log = require('../middleware/log');
+var wsctrl = require('./controller.ws.js');
 
 module.exports = {
   startServerByDataBase: startServerByDataBase,

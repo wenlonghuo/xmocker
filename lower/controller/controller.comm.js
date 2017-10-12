@@ -1,16 +1,20 @@
 'use strict';
 
 var serverInfo = global.serverInfo;
-var wsctrl = require('./controller.ws');
+var wsctrl = void 0;
 var inject = require('./controller.inject');
 var db = require('../database');
 
 var actions = {
+  init: function init() {
+    wsctrl = require('./controller.ws');
+  },
+
   response: function response(uid, data) {
-    process.send({ _uid: uid, status: 0, data: data });
+    wsctrl.broadToOwner({ _uid: uid, status: 0, data: data });
   },
   error: function error(uid, data, status) {
-    process.send({ _uid: uid, status: status || 1, data: data });
+    wsctrl.broadToOwner({ _uid: uid, status: status || 1, data: data });
   },
   reconfig: function reconfig(msg) {
     Object.assign(serverInfo.option, msg.data);
