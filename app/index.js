@@ -58,8 +58,14 @@ class Mocker {
             }
           })
 
-          this.ws = ws
-          resolve(data)
+          ws.on('open', () => {
+            this.ws = ws
+            resolve(data)
+          })
+          ws.on('error', (e) => {
+            reject(e)
+          })
+
           return
         }
         console.log(data)

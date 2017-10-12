@@ -1,0 +1,16 @@
+{
+  "name": "test",
+  "shortcut": "test",
+  "path": "",
+  "port": 9000,
+  "proxyTo": "",
+  "injectHtml": true,
+  "proxyTable": [],
+  "staticPath": [],
+  "urls": [],
+  "gulp": {},
+  "_uid": "belgxg4gkf40",
+  "_mt": 1505295520899,
+  "_id": "WxQ6lqMPVvTur49q",
+  "proxyType": 0
+}
