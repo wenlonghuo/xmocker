@@ -1,9 +1,5 @@
 'use strict';
 
-var _typeof2 = require('babel-runtime/helpers/typeof');
-
-var _typeof3 = _interopRequireDefault(_typeof2);
-
 var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
@@ -16,6 +12,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var spawn = require('child_process').spawn;
 var path = require('path');
+var WebSocket = require('ws');
 
 var Mocker = function () {
   function Mocker(options) {
@@ -37,7 +34,6 @@ var Mocker = function () {
       var startArgs = ['"' + dir + '"', '--option="' + convertCode(JSON.stringify(this.option)) + '"'];
       return new Promise(function (resolve, reject) {
         var server = spawn('node', startArgs, {
-          stdio: ['pipe', 'ipc', 'pipe'],
           shell: true
         });
 
@@ -51,22 +47,43 @@ var Mocker = function () {
           }
         });
 
-        server.on('message', function (msg) {
-          if ((typeof msg === 'undefined' ? 'undefined' : (0, _typeof3.default)(msg)) === 'object') {
-            if (msg.action === 'finish') {
-              _this.status = 3;
-              _this._option = msg.data;
-              resolve(msg.data);
-            } else if (msg.action === 'console') {
-              console.log(msg);
-            } else if (msg.action === 'log') {
-              if (log) {
-                log(msg);
+        server.stdout.on('data', function (data) {
+          data = data.toString();
+          if (/^finish::/.test(data)) {
+            data = JSON.parse(data.slice(8));
+
+            var ws = new WebSocket('ws://localhost:' + data.port + '/owners');
+
+            ws.on('message', function (req) {
+              try {
+                req = JSON.parse(req);
+              } catch (e) {
+                console.log(e);
+                return;
               }
-            } else {
-              _this._reqHandler(msg);
-            }
+              if (req._uid) {
+                return _this._reqHandler(req);
+              }
+
+              if (req.action === 'console') {
+                return console.log(req);
+              }
+              if (req.action === 'log' && log) {
+                log(req);
+              }
+            });
+
+            ws.on('open', function () {
+              _this.ws = ws;
+              resolve(data);
+            });
+            ws.on('error', function (e) {
+              reject(e);
+            });
+
+            return;
           }
+          console.log(data);
         });
         _this.server = server;
       });
@@ -95,7 +112,7 @@ var Mocker = function () {
 
       if (!this.server) throw new Error('server has not started!');
       var msg = { action: action, data: data, _uid: this._uid++ };
-      this.server._send(msg);
+      this.ws.send(JSON.stringify(msg));
       return new Promise(function (resolve, reject) {
         _this2.reqList.push({ _uid: msg._uid, resolve: resolve, reject: reject });
       });

@@ -17,6 +17,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var errorExp = /\$\{msg\}/gi;
 var uaParser = require('ua-parser-js');
 var serverInfo = global.serverInfo;
+var wsctrl = require('../controller/controller.ws');
 
 function formatParam(ctx, message) {
   var option = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
@@ -67,7 +68,7 @@ function logError(ctx, msg) {
 
   var data = formatParam(ctx, msg, option);
   data.type = 'error';
-  process.send(data);
+  wsctrl.broadToOwner(data);
 }
 
 function toError(ctx, msg) {
@@ -83,7 +84,7 @@ function logHis(ctx, msg) {
 
   var data = formatParam(ctx, msg, option);
   data.type = 'his';
-  process.send(data);
+  wsctrl.broadToOwner(data);
 }
 
 function logProxy(ctx, msg) {
@@ -91,7 +92,7 @@ function logProxy(ctx, msg) {
 
   var data = formatParam(ctx, msg, option);
   data.type = 'proxy';
-  process.send(data);
+  wsctrl.broadToOwner(data);
 }
 
 module.exports = function () {
