@@ -2,5 +2,5 @@
 .vscode/
 node_modules/
 debug*.log
+test/source/db/v1/*
 !test/source/db/v1/.gitkeep
-test/source/db/v1/
