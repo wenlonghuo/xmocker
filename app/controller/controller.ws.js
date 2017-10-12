@@ -1,6 +1,6 @@
 'use strict'
 const WebSocket = require('ws')
-let commAction = require('./controller.comm')
+let commAction
 
 const wsState = {
   clients: {
@@ -43,6 +43,10 @@ function wsConnect (wsClient) {
  * @param {*} msg
  */
 function incoming (msg) {
+  if (!commAction) {
+    commAction = require('./controller.comm')
+    commAction.init()
+  }
   try {
     msg = JSON.parse(msg)
     // deal income action
@@ -100,5 +104,3 @@ module.exports = {
   broadcast,
   broadToOwner,
 }
-
-commAction.init()

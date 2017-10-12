@@ -73,10 +73,8 @@ function setLinkData () {
 // 刷新页面接口
 const wsctrl = require('./controller.ws')
 async function refresh (ctx, next) {
-  if (wsctrl.wss) {
-    let pages = ctx.query.pages
-    wsctrl.broadcast({action: 'reload', pages: pages})
-  }
+  let pages = ctx.query.pages
+  wsctrl.broadcast({action: 'reload', pages: pages})
   ctx.body = 'ok'
 }
 
