@@ -1,0 +1,153 @@
+[
+  {
+    "url": "/apione/nomodel",
+    "method": "GET",
+    "name": "/apione/nomodel",
+    "path": "",
+    "pathEqual": "",
+    "delay": 0,
+    "description": "普通GET请求，无model",
+    "afterFunc": null,
+    "inputParam": {},
+    "outputParam": null,
+    "data": {
+      "code": 0,
+      "data": "one api base"
+    },
+    "_uid": "bfomoz9l6xk0",
+    "_mt": 1505695482727,
+    "_id": "rzyv8fGeGXY2kTeF",
+    "models": []
+  },
+  {
+    "url": "/apione/nomodel",
+    "method": "POST",
+    "name": "/apione/nomodel",
+    "path": "",
+    "pathEqual": "",
+    "delay": 0,
+    "description": "普通POST请求，无model",
+    "afterFunc": null,
+    "inputParam": {},
+    "outputParam": null,
+    "data": {
+      "code": 0,
+      "data": "one api base, post"
+    },
+    "_uid": "bfomoz9l6230",
+    "_mt": 1505695482727,
+    "_id": "rzyv8fGeGXY2kT4F",
+    "models": []
+  },
+  {
+    "url": "/api",
+    "method": "POST",
+    "path": "func",
+    "pathEqual": "secondPath",
+    "name": "secondPath",
+    "keywords": "",
+    "description": "无model，类型为Post的API，带二级路径的API",
+    "_uid": "bal0t19i941k",
+    "_mt": 1505377294532,
+    "_id": "ZN49Co3sf2oda8LT",
+    "data": {
+      "code": 0,
+      "data": "secondPath"
+    },
+    "models": []
+  },
+  {
+    "url": "/api",
+    "method": "POST",
+    "path": "",
+    "pathEqual": "",
+    "name": "onmodelApi",
+    "keywords": "",
+    "description": "一个model，类型为Post的API, 有默认的model",
+    "_uid": "bal0t19i940k",
+    "_mt": 1505377294532,
+    "_id": "ZN49Co3sf2odaALT",
+    "models": [
+      {
+        "baseid": "ZN49Co3sf2odaALT",
+        "_uid": "bal0t19iujkk",
+        "name": "主干",
+        "condition": "",
+        "data": {
+          "code": 0,
+          "data": "on default model"
+        },
+        "_mt": 1505377294532,
+        "_id": "ujP1JDbGhIPCkI5V"
+      }
+    ]
+  },
+  {
+    "url": "/apimulti",
+    "method": "POST",
+    "path": "",
+    "pathEqual": "",
+    "name": "onmodelApi",
+    "keywords": "",
+    "description": "一个model，类型为Post的API, 有默认的model",
+    "_uid": "bal0t19rg40k",
+    "_mt": 1505377294532,
+    "_id": "ZN49Co3sf2odaALT",
+    "models": [
+      {
+        "baseid": "ZN49Co3sf2odaALT",
+        "_uid": "bal0t19iujkk",
+        "name": "主干",
+        "condition": "",
+        "data": {
+          "code": 0,
+          "data": "on default model"
+        },
+        "_mt": 1505377294532,
+        "_id": "ujP1JDbGhIaxcI5V"
+      },
+      {
+        "baseid": "ZN49Co3sf2odaALT",
+        "_uid": "bal0t1933jkk",
+        "name": "主干",
+        "condition": "a == 1",
+        "data": {
+          "code": 0,
+          "data": "on condition"
+        },
+        "_mt": 1505377294532,
+        "_id": "ujP1JDbGhIax33cI5V"
+      }
+    ]
+  },
+  {
+    "url": "/apifallback",
+    "method": "POST",
+    "path": "",
+    "pathEqual": "",
+    "name": "onmodelApi",
+    "keywords": "",
+    "description": "fallback to base",
+    "_uid": "b2l0t19rg40k",
+    "_mt": 1505377294532,
+    "_id": "ZN49Co5sf2odaALT",
+    "data": {
+      "code": 0,
+      "data": "on base"
+    },
+    "models": [
+      {
+        "baseid": "ZN49Co5sf2odaALT",
+        "_uid": "bal0t198ujkk",
+        "name": "主干",
+        "condition": "false",
+        "data": {
+          "code": 0,
+          "data": "on default model"
+        },
+        "_mt": 1505377294532,
+        "_id": "ujP1JDbGhIa2cI5V"
+      }
+    ]
+  }
+]

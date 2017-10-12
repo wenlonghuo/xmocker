@@ -5,6 +5,7 @@ const http = require('http')
 const sendFile = require('../plugin/file-server')
 const htmlInject = require('../util/file-server-inject')
 const log = require('../middleware/log')
+const wsctrl = require('./controller.ws.js')
 
 module.exports = {
   startServerByDataBase,
@@ -133,11 +134,8 @@ async function startupServer (app, option = {}) {
     // 建立是的监听及server
     const httpServer = http.createServer(app.callback())
 
-    const WebSocket = require('ws')
     // 建立 websocket 服务
-    const wss = new WebSocket.Server({ server: httpServer })
-    const wsctrl = require('./controller.ws.js')
-    wsctrl.init(wss)
+    wsctrl.init(httpServer)
 
     httpServer.listen(option.port, function (e) {
       resolve()

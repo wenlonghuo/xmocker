@@ -3,6 +3,7 @@
 */
 const spawn = require('child_process').spawn
 const path = require('path')
+const WebSocket = require('ws')
 
 class Mocker {
   constructor (options) {
@@ -17,7 +18,6 @@ class Mocker {
     let startArgs = [`"${dir}"`, `--option="${convertCode(JSON.stringify(this.option))}"`]
     return new Promise((resolve, reject) => {
       let server = spawn('node', startArgs, {
-        stdio: ['pipe', 'ipc', 'pipe'],
         shell: true,
       })
 
@@ -31,22 +31,38 @@ class Mocker {
         }
       })
 
-      server.on('message', msg => {
-        if (typeof msg === 'object') {
-          if (msg.action === 'finish') {
-            this.status = 3
-            this._option = msg.data
-            resolve(msg.data)
-          } else if (msg.action === 'console') {
-            console.log(msg)
-          } else if (msg.action === 'log') {
-            if (log) {
-              log(msg)
+      server.stdout.on('data', data => {
+        data = data.toString()
+        if (/^finish::/.test(data)) {
+          data = JSON.parse(data.slice(8))
+          // connect to client by websocket
+          const ws = new WebSocket(`ws://localhost:${data.port}/owners`)
+
+          ws.on('message', req => {
+            // console.log(req)
+            try {
+              req = JSON.parse(req)
+            } catch (e) {
+              console.log(e)
+              return
             }
-          } else {
-            this._reqHandler(msg)
-          }
+            if (req._uid) {
+              return this._reqHandler(req)
+            }
+
+            if (req.action === 'console') {
+              return console.log(req)
+            }
+            if (req.action === 'log' && log) {
+              log(req)
+            }
+          })
+
+          this.ws = ws
+          resolve(data)
+          return
         }
+        console.log(data)
       })
       this.server = server
     })
@@ -67,7 +83,7 @@ class Mocker {
   _send (action, data) {
     if (!this.server) throw new Error('server has not started!')
     let msg = { action, data, _uid: this._uid++ }
-    this.server._send(msg)
+    this.ws.send(JSON.stringify(msg))
     return new Promise((resolve, reject) => {
       this.reqList.push({_uid: msg._uid, resolve, reject})
     })

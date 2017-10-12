@@ -1,3 +1,4 @@
+[![Build Status](https://www.travis-ci.org/wenlonghuo/xmocker.svg?branch=master)](https://www.travis-ci.org/wenlonghuo/xmocker)
 ### 前端mock用工具中间件
 #### 介绍
 支持：

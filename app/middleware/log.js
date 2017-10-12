@@ -21,6 +21,7 @@
 let errorExp = /\$\{msg\}/gi
 let uaParser = require('ua-parser-js')
 const serverInfo = global.serverInfo
+const wsctrl = require('../controller/controller.ws')
 
 function formatParam (ctx, message, option = {}) {
   const source = serverInfo.option.source
@@ -67,7 +68,7 @@ function formatParam (ctx, message, option = {}) {
 function logError (ctx, msg, option = {}) {
   let data = formatParam(ctx, msg, option)
   data.type = 'error'
-  process.send(data)
+  wsctrl.broadToOwner(data)
 }
 
 function toError (ctx, msg, option = {}) {
@@ -79,13 +80,13 @@ function toError (ctx, msg, option = {}) {
 function logHis (ctx, msg, option = {}) {
   let data = formatParam(ctx, msg, option)
   data.type = 'his'
-  process.send(data)
+  wsctrl.broadToOwner(data)
 }
 
 function logProxy (ctx, msg, option = {}) {
   let data = formatParam(ctx, msg, option)
   data.type = 'proxy'
-  process.send(data)
+  wsctrl.broadToOwner(data)
 }
 
 module.exports = function () {
