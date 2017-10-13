@@ -30,6 +30,7 @@ var Mocker = function () {
     value: function start(log) {
       var _this = this;
 
+      this._log = log;
       var dir = resolve('./app');
       var startArgs = ['"' + dir + '"', '--option="' + convertCode(JSON.stringify(this.option)) + '"'];
       return new Promise(function (resolve, reject) {
@@ -51,27 +52,11 @@ var Mocker = function () {
           data = data.toString();
           if (/^finish::/.test(data)) {
             data = JSON.parse(data.slice(8));
+            _this._port = data.port;
 
-            var ws = new WebSocket('ws://localhost:' + data.port + '/owners');
+            var ws = new WebSocket('ws://localhost:' + _this._port + '/owners');
 
-            ws.on('message', function (req) {
-              try {
-                req = JSON.parse(req);
-              } catch (e) {
-                console.log(e);
-                return;
-              }
-              if (req._uid) {
-                return _this._reqHandler(req);
-              }
-
-              if (req.action === 'console') {
-                return console.log(req);
-              }
-              if (req.action === 'log' && log) {
-                log(req);
-              }
-            });
+            ws.on('message', _this._dealWsMsg.bind(_this));
 
             ws.on('open', function () {
               _this.ws = ws;
@@ -80,12 +65,55 @@ var Mocker = function () {
             ws.on('error', function (e) {
               reject(e);
             });
+            ws.on('close', function (e) {
+              console.log('maybe something is wrong...', e);
+              _this._reConnectSocket();
+            });
 
             return;
           }
           console.log(data);
         });
         _this.server = server;
+      });
+    }
+  }, {
+    key: '_dealWsMsg',
+    value: function _dealWsMsg(req) {
+      try {
+        req = JSON.parse(req);
+      } catch (e) {
+        console.log(e);
+        return;
+      }
+      if (req._uid) {
+        return this._reqHandler(req);
+      }
+
+      if (req.action === 'console') {
+        return console.log(req);
+      }
+      if (req.action === 'log' && this._log) {
+        this._log(req);
+      }
+    }
+  }, {
+    key: '_reConnectSocket',
+    value: function _reConnectSocket() {
+      var _this2 = this;
+
+      var ws = new WebSocket('ws://localhost:' + this._port + '/owners');
+
+      ws.on('message', this._dealWsMsg.bind(this));
+
+      ws.on('open', function () {
+        _this2.ws = ws;
+      });
+      ws.on('close', function (e) {
+        setTimeout(_this2._reConnectSocket.bind(_this2), 1000);
+      });
+      ws.on('error', function (e) {
+        console.log(e);
       });
     }
   }, {
@@ -108,13 +136,13 @@ var Mocker = function () {
   }, {
     key: '_send',
     value: function _send(action, data) {
-      var _this2 = this;
+      var _this3 = this;
 
       if (!this.server) throw new Error('server has not started!');
       var msg = { action: action, data: data, _uid: this._uid++ };
       this.ws.send(JSON.stringify(msg));
       return new Promise(function (resolve, reject) {
-        _this2.reqList.push({ _uid: msg._uid, resolve: resolve, reject: reject });
+        _this3.reqList.push({ _uid: msg._uid, resolve: resolve, reject: reject });
       });
     }
   }, {
@@ -155,16 +183,16 @@ var Mocker = function () {
   }, {
     key: 'exit',
     value: function exit(option) {
-      var _this3 = this;
+      var _this4 = this;
 
       if (!this.server) return Promise.reject('server has not started!');
       return new Promise(function (resolve, reject) {
-        _this3.server.on('exit', function (code, signal) {
-          delete _this3.server;
-          _this3.status = 0;
-          resolve(_this3);
+        _this4.server.on('exit', function (code, signal) {
+          delete _this4.server;
+          _this4.status = 0;
+          resolve(_this4);
         });
-        _this3._send('exit', option);
+        _this4._send('exit', option);
       });
     }
   }, {

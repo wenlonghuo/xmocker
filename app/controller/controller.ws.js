@@ -82,22 +82,22 @@ function sendDataToClient (arr, data) {
 /**
  * 检测客户端状态
  */
-setInterval(function ping () {
-  wsState.wss.clients.forEach(function (ws) {
-    if (ws.isAlive === false) {
-      let arr = wsState.clients[ws.clientReqType]
-      if (arr) {
-        let index = arr.findIndex(item => item === ws)
-        if (~index) {
-          arr.splice(index, 1)
-        }
-      }
-      return ws.terminate()
-    }
-    ws.isAlive = false
-    ws.ping('', false, true)
-  })
-}, 30000)
+// setInterval(function ping () {
+//   wsState.wss.clients.forEach(function (ws) {
+//     if (ws.isAlive === false) {
+//       let arr = wsState.clients[ws.clientReqType]
+//       if (arr) {
+//         let index = arr.findIndex(item => item === ws)
+//         if (~index) {
+//           arr.splice(index, 1)
+//         }
+//       }
+//       return ws.terminate()
+//     }
+//     ws.isAlive = false
+//     ws.ping('{}', false, true)
+//   })
+// }, 3000)
 
 module.exports = {
   init,

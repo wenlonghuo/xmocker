@@ -14,6 +14,7 @@ class Mocker {
     this.status = 2
   }
   start (log) {
+    this._log = log
     let dir = resolve('./app')
     let startArgs = [`"${dir}"`, `--option="${convertCode(JSON.stringify(this.option))}"`]
     return new Promise((resolve, reject) => {
@@ -35,28 +36,11 @@ class Mocker {
         data = data.toString()
         if (/^finish::/.test(data)) {
           data = JSON.parse(data.slice(8))
+          this._port = data.port
           // connect to client by websocket
-          const ws = new WebSocket(`ws://localhost:${data.port}/owners`)
+          const ws = new WebSocket(`ws://localhost:${this._port}/owners`)
 
-          ws.on('message', req => {
-            // console.log(req)
-            try {
-              req = JSON.parse(req)
-            } catch (e) {
-              console.log(e)
-              return
-            }
-            if (req._uid) {
-              return this._reqHandler(req)
-            }
-
-            if (req.action === 'console') {
-              return console.log(req)
-            }
-            if (req.action === 'log' && log) {
-              log(req)
-            }
-          })
+          ws.on('message', this._dealWsMsg.bind(this))
 
           ws.on('open', () => {
             this.ws = ws
@@ -65,12 +49,49 @@ class Mocker {
           ws.on('error', (e) => {
             reject(e)
           })
+          ws.on('close', (e) => {
+            console.log('maybe something is wrong...', e)
+            this._reConnectSocket()
+          })
 
           return
         }
         console.log(data)
       })
       this.server = server
+    })
+  }
+  _dealWsMsg (req) {
+    try {
+      req = JSON.parse(req)
+    } catch (e) {
+      console.log(e)
+      return
+    }
+    if (req._uid) {
+      return this._reqHandler(req)
+    }
+
+    if (req.action === 'console') {
+      return console.log(req)
+    }
+    if (req.action === 'log' && this._log) {
+      this._log(req)
+    }
+  }
+  _reConnectSocket () {
+    const ws = new WebSocket(`ws://localhost:${this._port}/owners`)
+
+    ws.on('message', this._dealWsMsg.bind(this))
+
+    ws.on('open', () => {
+      this.ws = ws
+    })
+    ws.on('close', (e) => {
+      setTimeout(this._reConnectSocket.bind(this), 1000)
+    })
+    ws.on('error', (e) => {
+      console.log(e)
     })
   }
   _reqHandler (msg) {

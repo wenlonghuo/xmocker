@@ -65,25 +65,6 @@ function sendDataToClient(arr, data) {
   });
 }
 
-setInterval(function ping() {
-  wsState.wss.clients.forEach(function (ws) {
-    if (ws.isAlive === false) {
-      var arr = wsState.clients[ws.clientReqType];
-      if (arr) {
-        var index = arr.findIndex(function (item) {
-          return item === ws;
-        });
-        if (~index) {
-          arr.splice(index, 1);
-        }
-      }
-      return ws.terminate();
-    }
-    ws.isAlive = false;
-    ws.ping('', false, true);
-  });
-}, 30000);
-
 module.exports = {
   init: init,
   broadcast: broadcast,
