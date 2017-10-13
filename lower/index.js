@@ -60,6 +60,7 @@ var Mocker = function () {
 
             ws.on('open', function () {
               _this.ws = ws;
+              _this.status = 3;
               resolve(data);
             });
             ws.on('error', function (e) {
@@ -67,7 +68,9 @@ var Mocker = function () {
             });
             ws.on('close', function (e) {
               console.log('maybe something is wrong...', e);
-              _this._reConnectSocket();
+              if (_this.status > 1) {
+                _this._reConnectSocket();
+              }
             });
 
             return;
@@ -110,11 +113,11 @@ var Mocker = function () {
         _this2.ws = ws;
       });
       ws.on('close', function (e) {
-        setTimeout(_this2._reConnectSocket.bind(_this2), 1000);
+        if (_this2.status > 1) {
+          _this2._wsHandler = setTimeout(_this2._reConnectSocket.bind(_this2), 1000);
+        }
       });
-      ws.on('error', function (e) {
-        console.log(e);
-      });
+      ws.on('error', function (e) {});
     }
   }, {
     key: '_reqHandler',
@@ -193,6 +196,7 @@ var Mocker = function () {
           resolve(_this4);
         });
         _this4._send('exit', option);
+        clearTimeout(_this4._wsHandler);
       });
     }
   }, {

@@ -22,6 +22,7 @@ describe('server by json type', function () {
   testApi()
 
   describe('test interface', function () {
+    this.timeout(10000)
     it('reconfig', async function () {
       await serverjson.reconfig({
         inject: true,

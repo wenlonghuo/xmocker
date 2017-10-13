@@ -44,6 +44,7 @@ class Mocker {
 
           ws.on('open', () => {
             this.ws = ws
+            this.status = 3
             resolve(data)
           })
           ws.on('error', (e) => {
@@ -51,7 +52,9 @@ class Mocker {
           })
           ws.on('close', (e) => {
             console.log('maybe something is wrong...', e)
-            this._reConnectSocket()
+            if (this.status > 1) {
+              this._reConnectSocket()
+            }
           })
 
           return
@@ -88,10 +91,12 @@ class Mocker {
       this.ws = ws
     })
     ws.on('close', (e) => {
-      setTimeout(this._reConnectSocket.bind(this), 1000)
+      if (this.status > 1) {
+        this._wsHandler = setTimeout(this._reConnectSocket.bind(this), 1000)
+      }
     })
     ws.on('error', (e) => {
-      console.log(e)
+      // console.log(e)
     })
   }
   _reqHandler (msg) {
@@ -145,6 +150,7 @@ class Mocker {
         resolve(this)
       })
       this._send('exit', option)
+      clearTimeout(this._wsHandler)
     })
   }
   restart (option) {
