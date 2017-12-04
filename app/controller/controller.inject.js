@@ -84,6 +84,8 @@ async function storePageList (ctx, next) {
   if (!param) return
   let pages = param.html || []
   LINK.list = pages.map((url) => {
+    if (typeof url === 'object') return url
+
     return {
       _path: url.replace(/index.html$/, '').replace(/\/|\\/g, ''),
       path: url.replace(/index.html$/, '').replace(/\/|\\/g, ''),
