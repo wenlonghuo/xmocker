@@ -175,8 +175,10 @@ const databaseOperator = {
     try {
       let currentList, commonList
       currentList = await db.dbs.apiBase.cfind({ project: source.projectId }).sort({ name: 1 }).exec() || []
-      if (source.commonProjs && source.commonProjs.length) {
-        commonList = await db.dbs.apiBase.cfind({ project: { $in: source.commonProjs } }).sort({ name: 1 }).exec()
+
+      let commonProjs = serverInfo.option.commonProjs || []
+      if (commonProjs.length) {
+        commonList = await db.dbs.apiBase.cfind({ project: { $in: commonProjs } }).sort({ name: 1 }).exec()
       }
       commonList = commonList || []
       serverInfo.apiList.splice(0, serverInfo.apiList.length, ...currentList, ...commonList)
