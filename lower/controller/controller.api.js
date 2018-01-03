@@ -421,7 +421,7 @@ var databaseOperator = {
 
   fetchApiList: function () {
     var _ref4 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4() {
-      var serverInfo, status, source, _serverInfo$apiList, currentList, commonList;
+      var serverInfo, status, source, _serverInfo$apiList, currentList, commonList, commonProjs;
 
       return _regenerator2.default.wrap(function _callee4$(_context4) {
         while (1) {
@@ -459,38 +459,39 @@ var databaseOperator = {
 
             case 14:
               currentList = _context4.t0;
+              commonProjs = serverInfo.option.commonProjs || [];
 
-              if (!(source.commonProjs && source.commonProjs.length)) {
-                _context4.next = 19;
+              if (!commonProjs.length) {
+                _context4.next = 20;
                 break;
               }
 
-              _context4.next = 18;
-              return db.dbs.apiBase.cfind({ project: { $in: source.commonProjs } }).sort({ name: 1 }).exec();
-
-            case 18:
-              commonList = _context4.sent;
+              _context4.next = 19;
+              return db.dbs.apiBase.cfind({ project: { $in: commonProjs } }).sort({ name: 1 }).exec();
 
             case 19:
+              commonList = _context4.sent;
+
+            case 20:
               commonList = commonList || [];
               (_serverInfo$apiList = serverInfo.apiList).splice.apply(_serverInfo$apiList, [0, serverInfo.apiList.length].concat((0, _toConsumableArray3.default)(currentList), (0, _toConsumableArray3.default)(commonList)));
               this.isFetching = false;
-              _context4.next = 28;
+              _context4.next = 29;
               break;
 
-            case 24:
-              _context4.prev = 24;
+            case 25:
+              _context4.prev = 25;
               _context4.t1 = _context4['catch'](7);
 
               this.isFetching = false;
               throw _context4.t1;
 
-            case 28:
+            case 29:
             case 'end':
               return _context4.stop();
           }
         }
-      }, _callee4, this, [[7, 24]]);
+      }, _callee4, this, [[7, 25]]);
     }));
 
     function fetchApiList() {

@@ -1,5 +1,9 @@
 'use strict';
 
+var _typeof2 = require('babel-runtime/helpers/typeof');
+
+var _typeof3 = _interopRequireDefault(_typeof2);
+
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
@@ -57,6 +61,8 @@ var storePageList = function () {
             pages = param.html || [];
 
             LINK.list = pages.map(function (url) {
+              if ((typeof url === 'undefined' ? 'undefined' : (0, _typeof3.default)(url)) === 'object') return url;
+
               return {
                 _path: url.replace(/index.html$/, '').replace(/\/|\\/g, ''),
                 path: url.replace(/index.html$/, '').replace(/\/|\\/g, ''),
