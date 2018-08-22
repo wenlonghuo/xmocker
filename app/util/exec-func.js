@@ -1,6 +1,6 @@
 'use strict'
 
-module.exports = function execFunction (ctx, condition = '', params = {}) {
+module.exports = async function execFunction (ctx, condition = '', params = {}) {
   if (condition.indexOf('return') < 0) condition = 'return ' + condition
   let keys = Object.keys(params)
   let values = keys.map(key => params[key])
@@ -15,7 +15,7 @@ module.exports = function execFunction (ctx, condition = '', params = {}) {
 
   // 调用函数
   try {
-    return func.apply(ctx, values)
+    return await func.apply(ctx, values)
   } catch (e) {
     throw new Error(`api分支执行判断条件的函数时出现错误：${e.message}`)
   }

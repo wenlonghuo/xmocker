@@ -16,6 +16,71 @@ var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
+var getFinalData = function () {
+  var _ref10 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee10(_ref11) {
+    var _ref11$sourceModel = _ref11.sourceModel,
+        sourceModel = _ref11$sourceModel === undefined ? {} : _ref11$sourceModel,
+        base = _ref11.base,
+        oriParams = _ref11.oriParams,
+        parsedParams = _ref11.parsedParams,
+        ctx = _ref11.ctx;
+    var params, schema, mockData, data, afterFunc, dealedResult;
+    return _regenerator2.default.wrap(function _callee10$(_context10) {
+      while (1) {
+        switch (_context10.prev = _context10.next) {
+          case 0:
+            params = parsedParams;
+
+            if (!params) {
+              params = _.cloneDeep(oriParams);
+              schema = sourceModel.inputParam || base.inputParam;
+
+              if (schema && Object.keys(schema).length) {
+                createSchema(schema).format(params);
+              }
+            }
+            mockData = sourceModel.data || base.data;
+
+            if (typeof mockData === 'string') {
+              try {
+                mockData = JSON.parse(mockData);
+              } catch (e) {
+                console.log('数据转换为JSON出错', mockData);
+              }
+            }
+
+            data = (typeof mockData === 'undefined' ? 'undefined' : (0, _typeof3.default)(mockData)) === 'object' && mockData != null ? _.cloneDeep(mockData) : mockData;
+            afterFunc = (sourceModel.afterFunc || base.afterFunc || '').trim();
+
+            if (!afterFunc) {
+              _context10.next = 11;
+              break;
+            }
+
+            _context10.next = 9;
+            return execFunc(ctx, afterFunc, { params: params, data: data });
+
+          case 9:
+            dealedResult = _context10.sent;
+
+            if ((typeof dealedResult === 'undefined' ? 'undefined' : (0, _typeof3.default)(dealedResult)) === 'object') data = dealedResult;
+
+          case 11:
+            return _context10.abrupt('return', { data: data, params: params });
+
+          case 12:
+          case 'end':
+            return _context10.stop();
+        }
+      }
+    }, _callee10, this);
+  }));
+
+  return function getFinalData(_x11) {
+    return _ref10.apply(this, arguments);
+  };
+}();
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var fs = require('fs');
@@ -179,7 +244,7 @@ var common = {
 
             case 17:
               if (!(i < models.length)) {
-                _context2.next = 40;
+                _context2.next = 42;
                 break;
               }
 
@@ -194,7 +259,7 @@ var common = {
               }
 
               targetModel = model;
-              return _context2.abrupt('continue', 37);
+              return _context2.abrupt('continue', 39);
 
             case 24:
               _context2.prev = 24;
@@ -204,73 +269,80 @@ var common = {
               if (inputParam && Object.keys(inputParam).length) {
                 createSchema(inputParam).format(_params);
               }
+              _context2.next = 30;
+              return execFunc(ctx, condition, _params);
 
-              if (!execFunc(ctx, condition, _params)) {
-                _context2.next = 32;
+            case 30:
+              if (!_context2.sent) {
+                _context2.next = 34;
                 break;
               }
 
               finalParams = _params;
               targetModel = model;
-              return _context2.abrupt('break', 40);
-
-            case 32:
-              _context2.next = 37;
-              break;
+              return _context2.abrupt('break', 42);
 
             case 34:
-              _context2.prev = 34;
+              _context2.next = 39;
+              break;
+
+            case 36:
+              _context2.prev = 36;
               _context2.t1 = _context2['catch'](24);
               return _context2.abrupt('return', ctx.toError(_context2.t1, { base: base, model: model, params: params, e: _context2.t1 }));
 
-            case 37:
+            case 39:
               i++;
               _context2.next = 17;
               break;
 
-            case 40:
+            case 42:
               if (!(!targetModel && base.data == null && !(base.afterFunc || '').trim() && !base.outputParam)) {
-                _context2.next = 42;
+                _context2.next = 44;
                 break;
               }
 
               return _context2.abrupt('return', ctx.toError('该API暂无数据', { base: base, params: params }));
 
-            case 42:
+            case 44:
               sourceModel = targetModel || base || {};
 
               params = finalParams;
               data = void 0;
-              _context2.prev = 45;
-              result = getFinalData({ sourceModel: sourceModel, base: base, oriParams: oriParams, parsedParams: finalParams, ctx: ctx });
+              _context2.prev = 47;
+              _context2.next = 50;
+              return getFinalData({ sourceModel: sourceModel, base: base, oriParams: oriParams, parsedParams: finalParams, ctx: ctx });
+
+            case 50:
+              result = _context2.sent;
 
               params = result.params;
               data = result.data;
-              _context2.next = 54;
+              _context2.next = 58;
               break;
 
-            case 51:
-              _context2.prev = 51;
-              _context2.t2 = _context2['catch'](45);
+            case 55:
+              _context2.prev = 55;
+              _context2.t2 = _context2['catch'](47);
               return _context2.abrupt('return', ctx.toError(_context2.t2, { base: base, model: model, params: params, e: _context2.t2 }));
 
-            case 54:
+            case 58:
 
               ctx.log('获取api数据成功：' + base.name, { base: base, model: targetModel, params: params, res: data });
 
-              _context2.next = 57;
+              _context2.next = 61;
               return delay(base.delay);
 
-            case 57:
+            case 61:
               ctx.body = data;
               return _context2.abrupt('return', next());
 
-            case 59:
+            case 63:
             case 'end':
               return _context2.stop();
           }
         }
-      }, _callee2, this, [[5, 11], [24, 34], [45, 51]]);
+      }, _callee2, this, [[5, 11], [24, 36], [47, 55]]);
     }));
 
     function findModel(_x3, _x4) {
@@ -732,43 +804,6 @@ var jsonOperator = {
     return fetchApiList;
   }()
 };
-
-function getFinalData(_ref10) {
-  var _ref10$sourceModel = _ref10.sourceModel,
-      sourceModel = _ref10$sourceModel === undefined ? {} : _ref10$sourceModel,
-      base = _ref10.base,
-      oriParams = _ref10.oriParams,
-      parsedParams = _ref10.parsedParams,
-      ctx = _ref10.ctx;
-
-  var params = parsedParams;
-  if (!params) {
-    params = _.cloneDeep(oriParams);
-    var schema = sourceModel.inputParam || base.inputParam;
-    if (schema && Object.keys(schema).length) {
-      createSchema(schema).format(params);
-    }
-  }
-
-  var mockData = sourceModel.data || base.data;
-  if (typeof mockData === 'string') {
-    try {
-      mockData = JSON.parse(mockData);
-    } catch (e) {
-      console.log('数据转换为JSON出错', mockData);
-    }
-  }
-
-  var data = (typeof mockData === 'undefined' ? 'undefined' : (0, _typeof3.default)(mockData)) === 'object' && mockData != null ? _.cloneDeep(mockData) : mockData;
-
-  var afterFunc = (sourceModel.afterFunc || base.afterFunc || '').trim();
-  if (afterFunc) {
-    var dealedResult = execFunc(ctx, afterFunc, { params: params, data: data });
-    if ((typeof dealedResult === 'undefined' ? 'undefined' : (0, _typeof3.default)(dealedResult)) === 'object') data = dealedResult;
-  }
-
-  return { data: data, params: params };
-}
 
 function delay(time) {
   time = Number(time) || 0;

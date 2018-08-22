@@ -82,7 +82,7 @@ const common = {
         if (inputParam && Object.keys(inputParam).length) {
           createSchema(inputParam).format(params)
         }
-        if (execFunc(ctx, condition, params)) {
+        if (await execFunc(ctx, condition, params)) {
           finalParams = params
           targetModel = model
           break
@@ -102,7 +102,7 @@ const common = {
     let data
 
     try {
-      let result = getFinalData({ sourceModel, base, oriParams, parsedParams: finalParams, ctx })
+      let result = await getFinalData({ sourceModel, base, oriParams, parsedParams: finalParams, ctx })
       params = result.params
       data = result.data
     } catch (e) {
@@ -284,7 +284,7 @@ const jsonOperator = {
   },
 }
 
-function getFinalData ({sourceModel = {}, base, oriParams, parsedParams, ctx}) {
+async function getFinalData ({sourceModel = {}, base, oriParams, parsedParams, ctx}) {
   // 参数没有进行校验，则复制原始参数，并根据base中数据进行校验
   let params = parsedParams
   if (!params) {
@@ -310,7 +310,7 @@ function getFinalData ({sourceModel = {}, base, oriParams, parsedParams, ctx}) {
   // 执行输出处理函数
   let afterFunc = (sourceModel.afterFunc || base.afterFunc || '').trim()
   if (afterFunc) {
-    let dealedResult = execFunc(ctx, afterFunc, { params, data })
+    let dealedResult = await execFunc(ctx, afterFunc, { params, data })
     if (typeof dealedResult === 'object') data = dealedResult
   }
 
