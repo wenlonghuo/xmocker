@@ -1,6 +1,6 @@
 {
   "name": "xmocker",
-  "version": "1.0.18",
+  "version": "1.1.0",
   "description": "a middleware to start a xmock server quickly",
   "repository": "https://github.com/wenlonghuo/xmocker",
   "main": "index.js",
@@ -15,6 +15,7 @@
   "author": "jsyaowenlong@126.com",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.18.0",
     "babel-runtime": "^6.25.0",
     "debug": "^2.6.0",
     "fkill": "^5.0.0",
@@ -32,7 +33,6 @@
     "ws": "^1.1.1"
   },
   "devDependencies": {
-    "axios": "^0.16.2",
     "babel-cli": "^6.24.1",
     "babel-eslint": "^7.0.0",
     "babel-plugin-transform-runtime": "^6.0.0",

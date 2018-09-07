@@ -7,6 +7,7 @@ const createSchema = jsonGate.createSchema
 const execFunc = require('../util/exec-func')
 const db = require('../database/')
 const _ = require('lodash')
+const tool = require('../util/tool')
 
 const common = {
   findApi: async function findApi (ctx, next) {
@@ -150,7 +151,7 @@ const databaseOperator = {
           if (!model) return ctx.toError('指定的分支不存在！')
         }
         try {
-          let result = getFinalData({ sourceModel: model, base, oriParams: params, ctx })
+          let result = await getFinalData({ sourceModel: model, base, oriParams: params, ctx })
           data = result.data
         } catch (e) {
           return ctx.toError(e, { base, model, params, e })
@@ -310,6 +311,7 @@ async function getFinalData ({sourceModel = {}, base, oriParams, parsedParams, c
   // 执行输出处理函数
   let afterFunc = (sourceModel.afterFunc || base.afterFunc || '').trim()
   if (afterFunc) {
+    ctx.tool = { ...tool }
     let dealedResult = await execFunc(ctx, afterFunc, { params, data })
     if (typeof dealedResult === 'object') data = dealedResult
   }
