@@ -313,7 +313,7 @@ async function getFinalData ({sourceModel = {}, base, oriParams, parsedParams, c
   if (afterFunc) {
     ctx.tool = { ...tool }
     let dealedResult = await execFunc(ctx, afterFunc, { params, data })
-    if (typeof dealedResult === 'object') data = dealedResult
+    if (dealedResult != null) data = dealedResult
   }
 
   return {data, params}
