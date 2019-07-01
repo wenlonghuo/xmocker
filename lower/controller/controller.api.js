@@ -1,5 +1,9 @@
 'use strict';
 
+var _extends2 = require('babel-runtime/helpers/extends');
+
+var _extends3 = _interopRequireDefault(_extends2);
+
 var _typeof2 = require('babel-runtime/helpers/typeof');
 
 var _typeof3 = _interopRequireDefault(_typeof2);
@@ -53,22 +57,23 @@ var getFinalData = function () {
             afterFunc = (sourceModel.afterFunc || base.afterFunc || '').trim();
 
             if (!afterFunc) {
-              _context10.next = 11;
+              _context10.next = 12;
               break;
             }
 
-            _context10.next = 9;
+            ctx.tool = (0, _extends3.default)({}, tool);
+            _context10.next = 10;
             return execFunc(ctx, afterFunc, { params: params, data: data });
 
-          case 9:
+          case 10:
             dealedResult = _context10.sent;
 
-            if ((typeof dealedResult === 'undefined' ? 'undefined' : (0, _typeof3.default)(dealedResult)) === 'object') data = dealedResult;
-
-          case 11:
-            return _context10.abrupt('return', { data: data, params: params });
+            if (dealedResult !== undefined) data = dealedResult;
 
           case 12:
+            return _context10.abrupt('return', { data: data, params: params });
+
+          case 13:
           case 'end':
             return _context10.stop();
         }
@@ -90,6 +95,7 @@ var createSchema = jsonGate.createSchema;
 var execFunc = require('../util/exec-func');
 var db = require('../database/');
 var _ = require('lodash');
+var tool = require('../util/tool');
 
 var common = {
   findApi: function () {
@@ -406,7 +412,7 @@ var databaseOperator = {
               return _context3.abrupt('return', ctx.toError('指定的模板值不存在！', { e: _context3.t0 }));
 
             case 19:
-              _context3.next = 51;
+              _context3.next = 53;
               break;
 
             case 21:
@@ -416,12 +422,12 @@ var databaseOperator = {
               }
 
               ctx.throw(fixData.data.code, fixData.data.message);
-              _context3.next = 51;
+              _context3.next = 53;
               break;
 
             case 25:
               if (!(type === 3)) {
-                _context3.next = 50;
+                _context3.next = 52;
                 break;
               }
 
@@ -448,40 +454,44 @@ var databaseOperator = {
 
             case 34:
               _context3.prev = 34;
-              result = getFinalData({ sourceModel: model, base: base, oriParams: params, ctx: ctx });
+              _context3.next = 37;
+              return getFinalData({ sourceModel: model, base: base, oriParams: params, ctx: ctx });
+
+            case 37:
+              result = _context3.sent;
 
               _data = result.data;
-              _context3.next = 42;
+              _context3.next = 44;
               break;
 
-            case 39:
-              _context3.prev = 39;
+            case 41:
+              _context3.prev = 41;
               _context3.t1 = _context3['catch'](34);
               return _context3.abrupt('return', ctx.toError(_context3.t1, { base: base, model: model, params: params, e: _context3.t1 }));
 
-            case 42:
+            case 44:
               ctx.body = _data;
-              _context3.next = 48;
+              _context3.next = 50;
               break;
 
-            case 45:
-              _context3.prev = 45;
+            case 47:
+              _context3.prev = 47;
               _context3.t2 = _context3['catch'](26);
               return _context3.abrupt('return', ctx.toError('查询出错啦~~', { e: _context3.t2 }));
 
-            case 48:
-              _context3.next = 51;
+            case 50:
+              _context3.next = 53;
               break;
 
-            case 50:
+            case 52:
               return _context3.abrupt('return', next());
 
-            case 51:
+            case 53:
             case 'end':
               return _context3.stop();
           }
         }
-      }, _callee3, this, [[7, 16], [26, 45], [34, 39]]);
+      }, _callee3, this, [[7, 16], [26, 47], [34, 41]]);
     }));
 
     function findFix(_x5, _x6) {
