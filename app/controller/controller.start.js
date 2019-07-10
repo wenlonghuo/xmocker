@@ -6,6 +6,7 @@ const sendFile = require('../plugin/file-server')
 const htmlInject = require('../util/file-server-inject')
 const log = require('../middleware/log')
 const wsctrl = require('./controller.ws.js')
+const cors = require('@koa/cors')
 
 module.exports = {
   startServerByDataBase,
@@ -76,6 +77,11 @@ async function startServerByOption (app, option = {}) {
 async function startupServer (app, option = {}) {
   return new Promise((resolve, reject) => {
     app.use(log())
+
+    app.use(cors({
+      allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH',
+      credentials: true,
+    }))
 
     // proxy
     app.use(require('../middleware/proxyTo').proxyToGlobal({

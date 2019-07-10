@@ -194,6 +194,11 @@ var startupServer = function () {
             return _context8.abrupt('return', new Promise(function (resolve, reject) {
               app.use(log());
 
+              app.use(cors({
+                allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH',
+                credentials: true
+              }));
+
               app.use(require('../middleware/proxyTo').proxyToGlobal({
                 status: 404,
                 error: log.toError,
@@ -333,6 +338,7 @@ var sendFile = require('../plugin/file-server');
 var htmlInject = require('../util/file-server-inject');
 var log = require('../middleware/log');
 var wsctrl = require('./controller.ws.js');
+var cors = require('@koa/cors');
 
 module.exports = {
   startServerByDataBase: startServerByDataBase,
