@@ -28,10 +28,10 @@ async function execProxyList (ctx, proxyReg) {
   }
 }
 
-async function execProxy (ctx, target) {
+async function execProxy (ctx, target, otherOption = {}) {
   ctx.req.body = ctx.request.body
   try {
-    await proxy.web(ctx.req, ctx.res, {target: target})
+    await proxy.web(ctx.req, ctx.res, { target: target, ...otherOption })
   } catch (e) {
     throw e
   }
@@ -74,6 +74,7 @@ function proxyTo (target, {status, err, deal}) {
 // 代理分别指向不同API下的中间件
 function setProxyGlobal ({err, deal}) {
   return async function proxyTo (ctx, next) {
+    ctx.execProxy = execProxy
     let table = global.serverInfo.option.proxyTable
     if (!table || !table.length) return next()
     let proxyReg = toReg(table)
@@ -110,5 +111,6 @@ function proxyToGlobal ({status, err, deal}) {
 
 module.exports = setProxy
 module.exports.proxyTo = proxyTo
+module.exports.execProxy = execProxy
 module.exports.setProxyGlobal = setProxyGlobal
 module.exports.proxyToGlobal = proxyToGlobal

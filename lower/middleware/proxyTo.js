@@ -1,5 +1,9 @@
 'use strict';
 
+var _extends2 = require('babel-runtime/helpers/extends');
+
+var _extends3 = _interopRequireDefault(_extends2);
+
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
@@ -61,6 +65,7 @@ var execProxyList = function () {
 
 var execProxy = function () {
   var _ref2 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(ctx, target) {
+    var otherOption = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
     return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -68,7 +73,7 @@ var execProxy = function () {
             ctx.req.body = ctx.request.body;
             _context2.prev = 1;
             _context2.next = 4;
-            return proxy.web(ctx.req, ctx.res, { target: target });
+            return proxy.web(ctx.req, ctx.res, (0, _extends3.default)({ target: target }, otherOption));
 
           case 4:
             _context2.next = 9;
@@ -160,7 +165,7 @@ function setProxy(table, _ref3) {
       }, _callee3, this, [[1, 7]]);
     }));
 
-    function proxyTo(_x5, _x6) {
+    function proxyTo(_x6, _x7) {
       return _ref4.apply(this, arguments);
     }
 
@@ -228,7 +233,7 @@ function proxyTo(target, _ref5) {
       }, _callee5, this);
     }));
 
-    return function (_x7, _x8) {
+    return function (_x8, _x9) {
       return _ref6.apply(this, arguments);
     };
   }();
@@ -245,53 +250,54 @@ function setProxyGlobal(_ref8) {
         while (1) {
           switch (_context6.prev = _context6.next) {
             case 0:
+              ctx.execProxy = execProxy;
               table = global.serverInfo.option.proxyTable;
 
               if (!(!table || !table.length)) {
-                _context6.next = 3;
+                _context6.next = 4;
                 break;
               }
 
               return _context6.abrupt('return', next());
 
-            case 3:
+            case 4:
               proxyReg = toReg(table);
               data = void 0;
-              _context6.prev = 5;
-              _context6.next = 8;
+              _context6.prev = 6;
+              _context6.next = 9;
               return execProxyList(ctx, proxyReg);
 
-            case 8:
+            case 9:
               data = _context6.sent;
-              _context6.next = 15;
+              _context6.next = 16;
               break;
 
-            case 11:
-              _context6.prev = 11;
-              _context6.t0 = _context6['catch'](5);
+            case 12:
+              _context6.prev = 12;
+              _context6.t0 = _context6['catch'](6);
 
               if (err) err.call(ctx, ctx, '\u4EE3\u7406\u670D\u52A1\u5668\u5931\u8D25\uFF1A' + ctx.path, { e: _context6.t0 });
               return _context6.abrupt('return');
 
-            case 15:
+            case 16:
               if (deal) deal.call(ctx, ctx, '代理成功', { res: data });
 
               if (!(data === undefined)) {
-                _context6.next = 18;
+                _context6.next = 19;
                 break;
               }
 
               return _context6.abrupt('return', next());
 
-            case 18:
+            case 19:
             case 'end':
               return _context6.stop();
           }
         }
-      }, _callee6, this, [[5, 11]]);
+      }, _callee6, this, [[6, 12]]);
     }));
 
-    function proxyTo(_x9, _x10) {
+    function proxyTo(_x10, _x11) {
       return _ref9.apply(this, arguments);
     }
 
@@ -369,7 +375,7 @@ function proxyToGlobal(_ref10) {
       }, _callee8, this);
     }));
 
-    return function (_x11, _x12) {
+    return function (_x12, _x13) {
       return _ref11.apply(this, arguments);
     };
   }();
@@ -377,5 +383,6 @@ function proxyToGlobal(_ref10) {
 
 module.exports = setProxy;
 module.exports.proxyTo = proxyTo;
+module.exports.execProxy = execProxy;
 module.exports.setProxyGlobal = setProxyGlobal;
 module.exports.proxyToGlobal = proxyToGlobal;
