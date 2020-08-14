@@ -2,7 +2,7 @@
 const Koa = require('koa')
 const app = new Koa()
 const minimist = require('minimist')
-const bodyParser = require('koa-bodyparser')()
+const bodyParser = require('koa-bodyparser')
 
 // 全局变量定义区，待后续可改为配置
 var args = minimist(process.argv.slice(2))
@@ -16,7 +16,10 @@ global.serverInfo = {
   local: require('./util/getLocalInfo'),
 }
 
-app.use(bodyParser)
+app.use(bodyParser({
+  formLimit: '10mb',
+  jsonLimit: '10mb'
+}))
 
 // const actions = require('./controller/controller.comm')
 const start = require('./controller/controller.start')

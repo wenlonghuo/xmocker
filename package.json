@@ -1,6 +1,6 @@
 {
   "name": "xmocker",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "a middleware to start a xmock server quickly",
   "repository": "https://github.com/wenlonghuo/xmocker",
   "main": "index.js",
