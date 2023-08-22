@@ -29,6 +29,7 @@ const common = {
     // find api from apiList
     for (let i = 0; i < apiList.length; i++) {
       api = apiList[i]
+      if (api.disabled) continue
       // 判断  method 是否相等
       if (api.method.toUpperCase() !== ctx.method) continue
       // 判断 url 是否相等,并取出参数

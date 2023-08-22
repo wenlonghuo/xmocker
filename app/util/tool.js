@@ -1,4 +1,5 @@
 const axios = require('axios')
+const faker = require('@faker-js/faker').faker
 
 function timeStampToISOString (time, noHour = false) {
   let date = new Date(time)
@@ -21,6 +22,7 @@ function getDateRangeBefore (day = 0, time) {
 
 module.exports = {
   axios,
+  faker,
   randomInt (range = 100) {
     return Math.floor(Math.random() * range)
   },
