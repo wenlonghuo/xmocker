@@ -93,8 +93,11 @@ function setProxyGlobal ({err, deal}) {
 function proxyToGlobal ({status, err, deal}) {
   return async function (ctx, next) {
     let target = global.serverInfo.option.proxy404
+
+    // console.log({ target }, global.serverInfo.option.proxyMode)
     return next().then(async () => {
-      if (!target || !~~global.serverInfo.option.proxyMode) return
+      if (!target || !!~~global.serverInfo.option.proxyMode) return
+      // console.log('status', status, ctx.status)
       if (status === undefined || ctx.status === status) {
         let data
         try {
